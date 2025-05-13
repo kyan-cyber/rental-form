@@ -9,7 +9,7 @@ const itemName = urlParams.get('item');
 document.getElementById("item").value = itemName;
 
 // LIFF初期化（2007393080-wv2Vmo6D）
-liff.init({ liffId: "あなたのLIFF ID" }).then(() => {
+liff.init({ liffId: "2007393080-wv2Vmo6D" }).then(() => {
 if (!liff.isLoggedIn()) {
 liff.login();
 } else {
@@ -20,7 +20,7 @@ document.getElementById("userId").value = userId;
 
 // GAS に現在の貸出状況を確認（自動で「返却」選択に切り替える）
 
-fetch(`https://script.google.com/macros/s/＜https://script.google.com/macros/s/AKfycbzShpUoHT-Uupu-8YeGsXZIPxkwtmWqad6v66f3Oo17TfWDiurMSdSoo3E2ZaLIDs63/exec＞/exec?userId=${userId}&item=${itemName}`)
+fetch(`https://script.google.com/macros/s/AKfycbzShpUoHT-Uupu-8YeGsXZIPxkwtmWqad6v66f3Oo17TfWDiurMSdSoo3E2ZaLIDs63/exec?userId=${userId}&item=${itemName}`)
 .then(res => res.json())
 .then(result => {
 if (result.status === "貸出中") {
@@ -40,7 +40,7 @@ item: document.getElementById("item").value,
 action: document.getElementById("action").value
 };
 
-fetch("https://script.google.com/macros/s/AKfycbxxxxxx/exec", {
+fetch("https://script.google.com/macros/s/AKfycbzShpUoHT-Uupu-8YeGsXZIPxkwtmWqad6v66f3Oo17TfWDiurMSdSoo3E2ZaLIDs63/exec", {
 method: "POST",
 body: JSON.stringify(data),
 headers: { "Content-Type": "application/json" }
