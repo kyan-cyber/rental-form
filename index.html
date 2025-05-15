@@ -2,51 +2,49 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8" />
-  <title>貸出QRコード読み取り</title>
+  <title>貸出処理</title>
   <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
 </head>
 <body>
-  <h1>貸出QRコード読み取り</h1>
-  <button id="scanBtn">QRコードを読み取る</button>
-  <p id="status"></p>
+  <h1>貸出処理中...</h1>
+  <p id="status">処理を実行しています</p>
 
   <script>
     const GAS_URL = 'https://script.google.com/macros/s/AKfycbyXSIhomzYA_kuKsRasqRh89qtxb58sT6g4sB58sgayT-vsqSg6gJDCMiG45uzn8P64/exec';
 
     async function main() {
+      const urlParams = new URLSearchParams(window.location.search);
+      const itemId = urlParams.get('itemId');
+
+      if (!itemId) {
+        document.getElementById('status').textContent = '物品IDが見つかりませんでした。';
+        return;
+      }
+
       await liff.init({ liffId: '2007393080-wv2Vmo6D' });
 
-      document.getElementById('scanBtn').addEventListener('click', async () => {
-        try {
-          const result = await liff.scanCodeV2();
-          const itemId = result.value;
-          const profile = await liff.getProfile();
+      const profile = await liff.getProfile();
 
-          document.getElementById('status').textContent = `読み取ったQRコード: ${itemId}`;
-
-          // GASにPOST送信（ここ修正済み）
-          const res = await fetch(GAS_URL, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              userId: profile.userId,
-              itemId: itemId
-            })
-          });
-          const data = await res.json();
-
-          if (data.result === 'success') {
-            document.getElementById('status').textContent += '\n貸出処理が完了しました！';
-          } else {
-            document.getElementById('status').textContent += '\nエラーが発生しました: ' + data.message;
-          }
-        } catch (error) {
-          document.getElementById('status').textContent = '処理中にエラーが発生しました: ' + error.message;
-        }
+      // GASに送信
+      const res = await fetch(GAS_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId: profile.userId,
+          itemId: itemId
+        })
       });
+
+      const data = await res.json();
+      if (data.result === 'success') {
+        document.getElementById('status').textContent = `物品ID ${itemId} の貸出処理が完了しました！`;
+      } else {
+        document.getElementById('status').textContent = 'エラー: ' + data.message;
+      }
     }
 
     main();
   </script>
 </body>
 </html>
+
