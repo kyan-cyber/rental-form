@@ -47,32 +47,31 @@
 
         // 送信イベント
         document.getElementById("rentalForm").addEventListener("submit", async (e) => {
-          e.preventDefault();
+  　　  e.preventDefault();
 
-          const data = {
-            userId: userId,
-            item: document.getElementById("item").value,
-            action: document.getElementById("action").value,
-          };
+        const data = {
+        userId: userId,
+        item: document.getElementById("item").value,
+        action: document.getElementById("action").value,
+        };
 
-          document.getElementById("status").textContent = "送信中…";
+        try {
+        const response = await fetch("https://script.google.com/macros/s/あなたのGASのURL/exec", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+        });
 
-          try {
-            const response = await fetch(
-              "https://script.google.com/macros/s/https://script.google.com/macros/s/AKfycbzShpUoHT-Uupu-8YeGsXZIPxkwtmWqad6v66f3Oo17TfWDiurMSdSoo3E2ZaLIDs63/exec/exec",
-              {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(data),
-              }
-            );
+        if (response.ok) {
+       const action = data.action;
+       document.getElementById("rentalForm").style.display = "none";
+       document.getElementById("status").textContent =
+        action === "貸出" ? "貸出OK" : "返却OK";
+       } else {
+       document.getElementById("status").textContent = "送信に失敗しました。";
+       }
+       } catch (err) {
+       document.getElementById("status").textContent = "エラー: " + err;
+  }
+});
 
-            if (response.ok) {
-              alert("送信しました！");
-              liff.closeWindow();
-            } else {
-              alert("送信に失敗しました。");
-              document.getElementById("status").textContent = "送信に失敗しました。";
-            }
-          } catch (err) {
-            alert("エラーが発生しました。
