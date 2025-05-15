@@ -14,7 +14,7 @@
   <script>
     const liffId = "2007393080-wv2Vmo6D"; // ← 正しいLIFF IDに置き換えてください
 
-    liff.init({ liffId }).then(() => {
+  liff.init({ liffId }).then(() => {
       document.getElementById("status").textContent = "LIFF初期化成功！";
 
       if (!liff.isLoggedIn()) {
@@ -24,6 +24,8 @@
           const userId = profile.userId;
           document.getElementById("userId").textContent = "ユーザーID: " + userId;
           console.log("ユーザーID:", userId);
+        }).catch(err => {
+          console.error("プロフィール取得エラー:", err);
         });
       }
     }).catch(err => {
