@@ -24,8 +24,8 @@
 
           document.getElementById('status').textContent = `読み取ったQRコード: ${itemId}`;
 
-          // GASにPOST送信
-          const res = await fetch(https://script.google.com/macros/s/AKfycbyXSIhomzYA_kuKsRasqRh89qtxb58sT6g4sB58sgayT-vsqSg6gJDCMiG45uzn8P64/exec';
+          // GASにPOST送信（ここ修正済み）
+          const res = await fetch(GAS_URL, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
