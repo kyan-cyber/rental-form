@@ -1,37 +1,11 @@
 <!DOCTYPE html>
-<html>
-  <head>
+<html lang="ja">
+<head>
     <meta charset="UTF-8">
-    <title>Google Apps Script Test</title>
-  </head>
-  <body>
-    <button onclick="send()">送信</button>
-    <div id="status"></div>
-
-    <script>
-      function send() {
-        const statusDiv = document.getElementById("status");
-        statusDiv.textContent = "送信中...";
-
-        fetch("https://script.google.com/macros/s/AKfycbx9vdLe3U4IZi6HDZ9pbwdfzc5sLdN5s7l063QtfE7AyYCHUPC27wdjiKsh2MwC40Q4/exec", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ test: "hello" }),
-          mode: "cors",
-        })
-          .then((res) => {
-            if (!res.ok) throw new Error(`HTTPエラー: ${res.status}`);
-            return res.json();
-          })
-          .then((json) => {
-            statusDiv.textContent = `成功: 結果=${json.result}, 受信データ=${JSON.stringify(json.received)}`;
-          })
-          .catch((err) => {
-            statusDiv.textContent = `失敗: ${err.message}`;
-          });
-      }
-    </script>
-  </body>
+    <title>サンプルページ</title>
+</head>
+<body>
+    <h1>こんにちは！</h1>
+    <p>これはHTMLのサンプルコードです。</p>
+</body>
 </html>
