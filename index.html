@@ -1,39 +1,21 @@
 <!DOCTYPE html>
 <html>
-<head>
-  <meta charset="utf-8" />
-  <title>テストフォーム</title>
-</head>
-<body>
-  <h1>テストフォーム</h1>
+  <body>
+    <button onclick="send()">送信</button>
 
-  <button id="sendBtn">送信する</button>
-  <p id="result"></p>
-
-  <script>
-    document.getElementById("sendBtn").addEventListener("click", async () => {
-      const data = {
-        userId: "testUser",
-        item: "testItem",
-        action: "貸出"
-      };
-
-      try {
-        const response = await fetch("https://script.google.com/macros/s/AKfycbzE_Gwq0ZAigsNSVVt3GSAl_1pS5Gn2zgh4nDAySRdRZxUsk5LfZi9AXLQVk9BVBfCi/exec", {
+    <script>
+      function send() {
+        fetch("https://script.google.com/macros/s/AKfycbzE_Gwq0ZAigsNSVVt3GSAl_1pS5Gn2zgh4nDAySRdRZxUsk5LfZi9AXLQVk9BVBfCi/exec", {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(data),
-        });
-
-        if (response.ok) {
-          document.getElementById("result").textContent = "送信成功！";
-        } else {
-          document.getElementById("result").textContent = "送信失敗…";
-        }
-      } catch (e) {
-        document.getElementById("result").textContent = "エラー: " + e.message;
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ test: "hello" }),
+        })
+          .then((res) => res.text())
+          .then((text) => alert("成功: " + text))
+          .catch((err) => alert("失敗: " + err));
       }
-    });
-  </script>
-</body>
+    </script>
+  </body>
 </html>
