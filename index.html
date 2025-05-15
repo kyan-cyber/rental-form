@@ -2,20 +2,21 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8" />
-  <title>JavaScript読み込み例</title>
+  <title>データ取得テスト</title>
 </head>
 <body>
-  <h1>テスト</h1>
+  <h1>スプレッドシートのデータ</h1>
+  <div id="output">テスト</div>
 
   <script>
     fetch('https://script.google.com/macros/s/AKfycbyXSIhomzYA_kuKsRasqRh89qtxb58sT6g4sB58sgayT-vsqSg6gJDCMiG45uzn8P64/exec')
       .then(response => response.json())
       .then(data => {
-        console.log(data);
-        alert('データ取得完了！');
+        // 取得したデータを画面に表示
+        document.getElementById('output').textContent = JSON.stringify(data, null, 2);
       })
       .catch(error => {
-        console.error('エラー:', error);
+        document.getElementById('output').textContent = 'エラーが発生しました: ' + error;
       });
   </script>
 </body>
