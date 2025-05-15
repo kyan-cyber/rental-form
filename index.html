@@ -19,7 +19,7 @@
   <!-- LIFF SDK -->
   <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
   <script>
-    const liffId = "2007393080-wv2Vmo6D"; // ← ご自分のLIFF IDに置き換えてください
+    const liffId = "2007393080-wv2Vmo6D"; // ご自分のLIFF IDに置き換えてください
 
     async function main() {
       try {
@@ -50,8 +50,8 @@
           };
 
           try {
-            const response = await fetch("https://script.google.com/macros/s/https://script.google.com/macros/s/AKfycbzShpUoHT-Uupu-8YeGsXZIPxkwtmWqad6v66f3Oo17TfWDiurMSdSoo3E2ZaLIDs63/exec/exec", {
-
+            const response = await fetch("https://script.google.com/macros/s/AKfycbzShpUoHT-Uupu-8YeGsXZIPxkwtmWqad6v66f3Oo17TfWDiurMSdSoo3E2ZaLIDs63/exec", {
+              method: "POST", // 重要！
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify(data),
             });
@@ -77,4 +77,3 @@
   </script>
 </body>
 </html>
-
