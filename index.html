@@ -9,27 +9,22 @@
 
   <form id="rentalForm">
     <input type="hidden" id="userId" name="userId" />
-    <label>物品: </label>
-    <input type="text" id="item" name="item" /><br />
-    <label>操作: </label>
-    <select id="action" name="action">
-      <option value="貸出">貸出</option>
-      <option value="返却">返却</option>
-    </select><br />
-    <button type="submit">送信</button>
+    <input type="hidden" id="item" name="item" />
+    <input type="hidden" id="action" name="action" value="貸出" />
+    <button type="submit">貸出</button>
   </form>
 
-  <p id="status"></p>
+  <p id="status" style="display: none;"></p>
 
   <!-- LIFF SDK -->
   <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
   <script>
-    const liffId = "2007393080-wv2Vmo6D"; // あなたのLIFF IDに置き換えてください
+    const liffId = "2007393080-wv2Vmo6D"; // ← ご自分のLIFF IDに置き換えてください
 
     async function main() {
       try {
         await liff.init({ liffId });
-        
+
         if (!liff.isLoggedIn()) {
           liff.login();
           return;
@@ -39,7 +34,7 @@
         const userId = profile.userId;
         document.getElementById("userId").value = userId;
 
-        // URLパラメータから item を取得してフォームに設定
+        // URLパラメータから物品名を取得して hidden にセット
         const urlParams = new URLSearchParams(window.location.search);
         const itemName = urlParams.get("item") || "";
         document.getElementById("item").value = itemName;
@@ -50,8 +45,8 @@
 
           const data = {
             userId: userId,
-            item: document.getElementById("item").value,
-            action: document.getElementById("action").value,
+            item: itemName,
+            action: "貸出"
           };
 
           try {
@@ -62,27 +57,24 @@
             });
 
             if (response.ok) {
-              const action = data.action;
               document.getElementById("rentalForm").style.display = "none";
-              document.getElementById("status").textContent =
-                action === "貸出" ? "貸出OK" : "返却OK";
+              const status = document.getElementById("status");
+              status.textContent = "貸出OK";
+              status.style.display = "block";
             } else {
-              document.getElementById("status").textContent = "送信に失敗しました。";
+              alert("送信に失敗しました。");
             }
           } catch (err) {
-            document.getElementById("status").textContent = "エラー: " + err;
+            alert("エラー: " + err);
           }
         });
-
       } catch (error) {
-        document.getElementById("status").textContent = "LIFF初期化失敗：" + error;
+        alert("LIFF初期化失敗：" + error);
       }
     }
 
-    // 必須！ main関数の実行
     main();
   </script>
 </body>
 </html>
-
 
