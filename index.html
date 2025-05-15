@@ -5,29 +5,30 @@
   <title>LIFFテスト</title>
 </head>
 <body>
-  <h1>LIFFテスト画面</h1>
+  <h1>LIFFユーザー確認</h1>
   <p id="status">LIFF初期化中...</p>
+  <p id="userId">ユーザーID: （取得中）</p>
 
-  <!-- LIFF SDK 読み込み -->
+  <!-- LIFF SDK -->
   <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
   <script>
-    // あなたのLIFF IDに置き換えてください（例: "2007393082-pVb8R9dQ"）
-    const liffId = "2007393080-wv2Vmo6D";
+    const liffId = "2007393080-wv2Vmo6D"; // ← 正しいLIFF IDに置き換えてください
 
-    liff.init({ liffId: liffId }).then(() => {
+    liff.init({ liffId }).then(() => {
       document.getElementById("status").textContent = "LIFF初期化成功！";
-    }).catch(err => {
-      console.error("LIFF初期化エラー:", err);
-      document.getElementById("status").textContent = "LIFF初期化エラー: " + err;
-    });
-  </script>
-</body>
-</html>
 
+      if (!liff.isLoggedIn()) {
+        liff.login();
+      } else {
+        liff.getProfile().then(profile => {
+          const userId = profile.userId;
+          document.getElementById("userId").textContent = "ユーザーID: " + userId;
+          console.log("ユーザーID:", userId);
         });
       }
     }).catch(err => {
       console.error("LIFF初期化エラー:", err);
+      document.getElementById("status").textContent = "LIFF初期化エラー: " + err;
     });
   </script>
 </body>
