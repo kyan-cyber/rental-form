@@ -2,22 +2,51 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8" />
-  <title>データ取得テスト</title>
+  <title>貸出QRコード読み取り</title>
+  <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
 </head>
 <body>
-  <h1>スプレッドシートのデータ</h1>
-  <div id="output">テスト</div>
+  <h1>貸出QRコード読み取り</h1>
+  <button id="scanBtn">QRコードを読み取る</button>
+  <p id="status"></p>
 
   <script>
-    fetch('https://script.google.com/macros/s/AKfycbyXSIhomzYA_kuKsRasqRh89qtxb58sT6g4sB58sgayT-vsqSg6gJDCMiG45uzn8P64/exec')
-      .then(response => response.json())
-      .then(data => {
-        // 取得したデータを画面に表示
-        document.getElementById('output').textContent = JSON.stringify(data, null, 2);
-      })
-      .catch(error => {
-        document.getElementById('output').textContent = 'エラーが発生しました: ' + error;
+    const GAS_URL = 'https://script.google.com/macros/s/AKfycbyXSIhomzYA_kuKsRasqRh89qtxb58sT6g4sB58sgayT-vsqSg6gJDCMiG45uzn8P64/exec';
+
+    async function main() {
+      await liff.init({ liffId: '2007393080-wv2Vmo6D' });
+
+      document.getElementById('scanBtn').addEventListener('click', async () => {
+        try {
+          const result = await liff.scanCodeV2();
+          const itemId = result.value;
+          const profile = await liff.getProfile();
+
+          document.getElementById('status').textContent = `読み取ったQRコード: ${itemId}`;
+
+          // GASにPOST送信
+          const res = await fetch(https://script.google.com/macros/s/AKfycbyXSIhomzYA_kuKsRasqRh89qtxb58sT6g4sB58sgayT-vsqSg6gJDCMiG45uzn8P64/exec';
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              userId: profile.userId,
+              itemId: itemId
+            })
+          });
+          const data = await res.json();
+
+          if (data.result === 'success') {
+            document.getElementById('status').textContent += '\n貸出処理が完了しました！';
+          } else {
+            document.getElementById('status').textContent += '\nエラーが発生しました: ' + data.message;
+          }
+        } catch (error) {
+          document.getElementById('status').textContent = '処理中にエラーが発生しました: ' + error.message;
+        }
       });
+    }
+
+    main();
   </script>
 </body>
 </html>
