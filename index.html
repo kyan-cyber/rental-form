@@ -1,25 +1,6 @@
-<!DOCTYPE html>
-<html lang="ja">
-<head>
-    <meta charset="UTF-8">
-    <title>大きなボタンのサンプル</title>
-    <style>
-        /* ボタンを大きく見せるスタイル */
-        button {
-            font-size: 36px;      /* 文字サイズを大きく */
-            padding: 20px 60px;   /* ボタンの内側の余白を大きく */
-            cursor: pointer;      /* ホバー時にカーソルを手の形に */
-            border-radius: 12px;  /* 角丸に */
-            background-color: #4CAF50; /* 緑色 */
-            color: white;
-            border: none;
-        }
-        button:hover {
-            background-color: #45a049; /* ホバー時の色変化 */
-        }
-    </style>
-</head>
-<body>
-    <button onclick="alert('ボタンが押されました！')">押してね！</button>
-</body>
-</html>
+fetch('https://script.google.com/macros/s/AKfycbyXSIhomzYA_kuKsRasqRh89qtxb58sT6g4sB58sgayT-vsqSg6gJDCMiG45uzn8P64/exec')
+  .then(response => response.json())
+  .then(data => {
+    console.log(data);
+    // ここで取得したデータを使ってHTMLを書き換えなどできます
+  });
