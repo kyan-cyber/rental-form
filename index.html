@@ -2,68 +2,28 @@
 <html>
 <head>
   <meta charset="utf-8">
-  <title>貸出フォーム</title>
+  <title>LIFFテスト</title>
 </head>
 <body>
-  <h1>貸出フォーム</h1>
+  <h1>LIFFテスト画面</h1>
+  <p id="status">LIFF初期化中...</p>
 
-  <!-- ✅ formタグの開始を追加 -->
-  <form id="rentalForm">
-    <input type="hidden" id="userId" name="userId">
-    <label>物品:</label><input type="text" id="item" name="item"><br>
-    <label>操作:</label>
-    <select id="action" name="action">
-      <option value="貸出">貸出</option>
-      <option value="返却">返却</option>
-    </select><br>
-    <button type="submit">送信</button>
-  </form>
-
-  <!-- LINE LIFF SDK -->
+  <!-- LIFF SDK 読み込み -->
   <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
   <script>
-    // URLから item 名を取得してフォームに反映
-    const urlParams = new URLSearchParams(window.location.search);
-    const itemName = urlParams.get('item');
-    document.getElementById("item").value = itemName;
+    // あなたのLIFF IDに置き換えてください（例: "2007393082-pVb8R9dQ"）
+    const liffId = "あなたのLIFF_ID";
 
-    // LIFF初期化
-    liff.init({ liffId: "2007393080-wv2Vmo6D" }).then(() => {
-      if (!liff.isLoggedIn()) {
-        liff.login();
-      } else {
-        liff.getProfile().then(profile => {
-          const userId = profile.userId;
-          document.getElementById("userId").value = userId;
+    liff.init({ liffId: liffId }).then(() => {
+      document.getElementById("status").textContent = "LIFF初期化成功！";
+    }).catch(err => {
+      console.error("LIFF初期化エラー:", err);
+      document.getElementById("status").textContent = "LIFF初期化エラー: " + err;
+    });
+  </script>
+</body>
+</html>
 
-          // GAS に貸出状況確認
-          fetch(`https://script.google.com/macros/s/AKfycbzShpUoHT-Uupu-8YeGsXZIPxkwtmWqad6v66f3Oo17TfWDiurMSdSoo3E2ZaLIDs63/exec?userId=${userId}&item=${itemName}`)
-            .then(res => res.json())
-            .then(result => {
-              if (result.status === "貸出中") {
-                document.getElementById("action").value = "返却";
-              } else {
-                document.getElementById("action").value = "貸出";
-              }
-            });
-
-          // フォーム送信処理
-          document.getElementById("rentalForm").addEventListener("submit", function(e) {
-            e.preventDefault();
-            const data = {
-              userId: userId,
-              item: document.getElementById("item").value,
-              action: document.getElementById("action").value
-            };
-            fetch(`https://script.google.com/macros/s/AKfycbzShpUoHT-Uupu-8YeGsXZIPxkwtmWqad6v66f3Oo17TfWDiurMSdSoo3E2ZaLIDs63/exec`, {
-              method: "POST",
-              body: JSON.stringify(data),
-              headers: { "Content-Type": "application/json" }
-            }).then(() => {
-              alert("送信しました");
-              liff.closeWindow();
-            });
-          });
         });
       }
     }).catch(err => {
