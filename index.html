@@ -1,6 +1,22 @@
-fetch('https://script.google.com/macros/s/AKfycbyXSIhomzYA_kuKsRasqRh89qtxb58sT6g4sB58sgayT-vsqSg6gJDCMiG45uzn8P64/exec')
-  .then(response => response.json())
-  .then(data => {
-    console.log(data);
-    // ここで取得したデータを使ってHTMLを書き換えなどできます
-  });
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <title>JavaScript読み込み例</title>
+</head>
+<body>
+  <h1>テスト</h1>
+
+  <script>
+    fetch('https://script.google.com/macros/s/AKfycbyXSIhomzYA_kuKsRasqRh89qtxb58sT6g4sB58sgayT-vsqSg6gJDCMiG45uzn8P64/exec')
+      .then(response => response.json())
+      .then(data => {
+        console.log(data);
+        alert('データ取得完了！');
+      })
+      .catch(error => {
+        console.error('エラー:', error);
+      });
+  </script>
+</body>
+</html>
