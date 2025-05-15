@@ -29,8 +29,7 @@
     async function main() {
       try {
         await liff.init({ liffId });
-        document.getElementById("status").textContent = "LIFF初期化成功！";
-
+        
         if (!liff.isLoggedIn()) {
           liff.login();
           return;
