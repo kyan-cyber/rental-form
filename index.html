@@ -13,33 +13,38 @@
     const GAS_URL = 'https://script.google.com/macros/s/AKfycbyXSIhomzYA_kuKsRasqRh89qtxb58sT6g4sB58sgayT-vsqSg6gJDCMiG45uzn8P64/exec';
 
     async function main() {
-      const urlParams = new URLSearchParams(window.location.search);
-      const itemId = urlParams.get('itemId');
+      try {
+        await liff.init({ liffId: '2007393080-wv2Vmo6D' });
 
-      if (!itemId) {
-        document.getElementById('status').textContent = '物品IDが見つかりませんでした。';
-        return;
-      }
+        // liff.init 後に URL を取得
+        const urlParams = new URLSearchParams(window.location.search);
+        const itemId = urlParams.get('itemId');
 
-      await liff.init({ liffId: '2007393080-wv2Vmo6D' });
+        if (!itemId) {
+          document.getElementById('status').textContent = '物品IDが見つかりませんでした。';
+          return;
+        }
 
-      const profile = await liff.getProfile();
+        const profile = await liff.getProfile();
 
-      // GASに送信
-      const res = await fetch(GAS_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          userId: profile.userId,
-          itemId: itemId
-        })
-      });
+        // GASに送信
+        const res = await fetch(GAS_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            userId: profile.userId,
+            itemId: itemId
+          })
+        });
 
-      const data = await res.json();
-      if (data.result === 'success') {
-        document.getElementById('status').textContent = `物品ID ${itemId} の貸出処理が完了しました！`;
-      } else {
-        document.getElementById('status').textContent = 'エラー: ' + data.message;
+        const data = await res.json();
+        if (data.result === 'success') {
+          document.getElementById('status').textContent = `物品ID ${itemId} の貸出処理が完了しました！`;
+        } else {
+          document.getElementById('status').textContent = 'エラー: ' + data.message;
+        }
+      } catch (err) {
+        document.getElementById('status').textContent = 'エラー: ' + err.message;
       }
     }
 
@@ -47,4 +52,3 @@
   </script>
 </body>
 </html>
-
