@@ -1,58 +1,57 @@
 <!DOCTYPE html>
-<html lang="ja">
+<html>
 <head>
-  <meta charset="UTF-8">
-  <title>ボタンを押して</title>
+  <title>シンプルゲーム</title>
   <style>
-    body {
-      font-family: sans-serif;
-      text-align: center;
-      background-color: #f0f8ff;
-      padding: 50px;
-    }
-
-    button {
-      font-size: 2rem;
-      padding: 20px 40px;
-      background-color: #ff5722;
-      color: white;
-      border: none;
-      border-radius: 15px;
-      cursor: pointer;
-    }
-
-    button:hover {
-      background-color: #e64a19;
-    }
-
-    #effectImage {
-      margin-top: 30px;
-      width: 300px;
-      display: none;
+    #gameCanvas {
+      background: #eee;
+      display: block;
+      margin: 20px auto;
+      border: 1px solid #ccc;
     }
   </style>
 </head>
 <body>
-  <h1>sound.mp3</h1>
-  <button id="soundButton">押して！</button>
-  <br>
-  <img id="effectImage" src="image.png" alt="表示画像" />
-  <audio id="soundEffect" src="sound.mp3"></audio>
-
+  <canvas id="gameCanvas" width="400" height="300"></canvas>
   <script>
-    document.getElementById("soundButton").addEventListener("click", () => {
-      const sound = document.getElementById("soundEffect");
-      const image = document.getElementById("effectImage");
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
 
-      sound.currentTime = 0;
-      sound.play();
+    let x = 50;
+    let y = 50;
+    let dx = 2;
+    let dy = 2;
 
-      image.style.display = "block";
+    function draw() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = 'red';
+      ctx.beginPath();
+      ctx.moveTo(x, y);
+      ctx.lineTo(x + 20, y + 10);
+      ctx.lineTo(x, y + 20);
+      ctx.lineTo(x - 20, y + 10);
+      ctx.closePath();
+      ctx.fill();
 
-      setTimeout(() => {
-        image.style.display = "none";
-      }, 3000);
-    });
+      ctx.fillStyle = 'blue';
+      ctx.beginPath();
+      ctx.moveTo(canvas.width - x, canvas.height - y);
+      ctx.lineTo(canvas.width - x + 20, canvas.height - y + 10);
+      ctx.lineTo(canvas.width - x, canvas.height - y + 20);
+      ctx.lineTo(canvas.width - x - 20, canvas.height - y + 10);
+      ctx.closePath();
+      ctx.fill();
+
+      x += dx;
+      y += dy;
+
+      if (x > canvas.width - 20 || x < 20) dx = -dx;
+      if (y > canvas.height - 20 || y < 20) dy = -dy;
+
+      requestAnimationFrame(draw);
+    }
+
+    draw();
   </script>
 </body>
 </html>
