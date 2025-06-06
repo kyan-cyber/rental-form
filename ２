@@ -1,5 +1,5 @@
 git init
-git remote add origin https://github.com/あなたのユーザー名/sound-button-app.git
+git remote add origin https://github.com/kyan-cyber/sound-button-app.git
 git add .
 git commit -m "初回コミット"
 git push -u origin main
