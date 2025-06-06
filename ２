@@ -1,11 +1,5 @@
-<!DOCTYPE html>
-<html lang="ja">
-<head>
-    <meta charset="UTF-8">
-    <title>サンプルページ</title>
-</head>
-<body>
-    <h1>こんにちは！</h1>
-    <p>これはHTMLのサンプルコードです。</p>
-</body>
-</html>
+git init
+git remote add origin https://github.com/あなたのユーザー名/sound-button-app.git
+git add .
+git commit -m "初回コミット"
+git push -u origin main
