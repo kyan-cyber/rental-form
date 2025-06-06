@@ -1,5 +1,18 @@
-git init
-git remote add origin https://github.com/kyan-cyber/sound-button-app.git
-git add .
-git commit -m "初回コミット"
-git push -u origin main
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ボタン効果音</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="container">
+    <h1>効果音ボタン</h1>
+    <button id="soundButton">押して！</button>
+    <img id="effectImage" src="image.png" alt="画像" style="display: none;" />
+    <audio id="soundEffect" src="sound.mp3"></audio>
+  </div>
+  <script src="script.js"></script>
+</body>
+</html>
