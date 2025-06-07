@@ -1,221 +1,27 @@
-<!DOCTYPE html>
-<html lang="ja">
-<head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>カード開封ガチャ</title>
-<style>
-  body {
-    background: linear-gradient(135deg, #1e2a78, #0b0f2b);
-    color: #fff;
-    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-    text-align: center;
-    padding: 20px;
-  }
-  #drawBtn {
-    background: gold;
-    border: none;
-    border-radius: 12px;
-    padding: 15px 40px;
-    font-size: 24px;
-    font-weight: bold;
-    color: #3a1c00;
-    cursor: pointer;
-    box-shadow: 0 0 10px gold;
-    transition: transform 0.2s ease;
-    user-select: none;
-  }
-  #drawBtn:disabled {
-    background: #aaa;
-    cursor: default;
-    box-shadow: none;
-  }
-  #drawBtn:active:not(:disabled) {
-    transform: scale(0.95);
-  }
-  
-  /* ガチャボール */
-  #gachaBall {
-    width: 120px;
-    height: 120px;
-    background: radial-gradient(circle at 30% 30%, #ff0000, #990000);
-    border-radius: 50%;
-    margin: 40px auto;
-    position: relative;
-    user-select: none;
-    box-shadow: 0 0 15px #ff4444;
-    opacity: 0;
-  }
-  
-  /* 転がるアニメーション */
-  @keyframes rollIn {
-    0% {
-      transform: translateX(100vw) rotate(0deg);
-      opacity: 1;
-    }
-    90% {
-      transform: translateX(0) rotate(720deg);
-      opacity: 1;
-    }
-    100% {
-      transform: translateX(0) rotate(720deg);
-      opacity: 1;
-    }
-  }
-  
-  /* 割れるアニメーション */
-  @keyframes splitOpen {
-    0% {
-      opacity: 1;
-      transform: scale(1);
-    }
-    100% {
-      opacity: 0;
-      transform: scale(1.5);
-    }
-  }
-  
-  /* カード表示 */
-  #card {
-    width: 240px;
-    height: 320px;
-    background: #222;
-    margin: 40px auto 0;
-    border-radius: 20px;
-    box-shadow: 0 0 20px #f0c830;
-    display: none;
-    user-select: none;
-  }
-  #cardImg {
-    width: 100%;
-    height: 240px;
-    object-fit: contain;
-    border-bottom: 3px solid #f0c830;
-  }
-  #resultName {
-    font-size: 22px;
-    margin: 8px 0 0;
-    color: #fff;
-  }
-  #resultRarity {
-    font-size: 18px;
-    color: #ffd700;
-    margin-top: 4px;
-  }
-  /* レア度別カラー */
-  .N {
-    border: 3px solid #bbb;
-    box-shadow: 0 0 10px #bbb;
-  }
-  .R {
-    border: 3px solid #39a4ff;
-    box-shadow: 0 0 20px #39a4ff;
-  }
-  .SR {
-    border: 3px solid #db58ff;
-    box-shadow: 0 0 30px #db58ff;
-  }
-  .UR {
-    border: 3px solid #ff5c5c;
-    box-shadow: 0 0 40px #ff5c5c;
-  }
-  .SE {
-    border: 3px solid #ffd700;
-    box-shadow: 0 0 50px #ffd700;
-  }
-</style>
-</head>
-<body>
+const cards = [
+  // Nカード
+  {id:1, name:"Nカード1", rarity:"N", img:"images/N1.png"},
+  {id:2, name:"Nカード2", rarity:"N", img:"images/N2.png"},
+  // ...
+  {id:25, name:"Nカード25", rarity:"N", img:"images/N25.png"},
 
-<h1>カード開封ガチャ</h1>
-<button id="drawBtn">ガチャを引く</button>
+  // Rカード
+  {id:26, name:"Rカード1", rarity:"R", img:"images/R1.png"},
+  // ...
+  {id:35, name:"Rカード10", rarity:"R", img:"images/R10.png"},
 
-<div id="gachaBall"></div>
+  // SRカード
+  {id:36, name:"SRカード1", rarity:"SR", img:"images/SR1.png"},
+  // ...
+  {id:42, name:"SRカード7", rarity:"SR", img:"images/SR7.png"},
 
-<div id="card">
-  <img id="cardImg" src="" alt="カード画像" />
-  <div id="resultName"></div>
-  <div id="resultRarity"></div>
-</div>
+  // URカード
+  {id:43, name:"URカード1", rarity:"UR", img:"images/UR1.png"},
+  // ...
+  {id:47, name:"URカード5", rarity:"UR", img:"images/UR5.png"},
 
-<script>
-  // カードデータ（実際は50枚用意してください）
-  const cards = [
-    {id:1, name:"Nカード1", rarity:"N", img:"https://picsum.photos/seed/N1/240/240"},
-    {id:2, name:"Rカード1", rarity:"R", img:"https://picsum.photos/seed/R1/240/240"},
-    {id:3, name:"SRカード1", rarity:"SR", img:"https://picsum.photos/seed/SR1/240/240"},
-    {id:4, name:"URカード1", rarity:"UR", img:"https://picsum.photos/seed/UR1/240/240"},
-    {id:5, name:"SEカード1", rarity:"SE", img:"https://picsum.photos/seed/SE1/240/240"},
-  ];
-
-  // レア度確率（合計1）
-  const rarities = [
-    {name: "SE", rate: 0.005},
-    {name: "UR", rate: 0.02},
-    {name: "SR", rate: 0.1},
-    {name: "R", rate: 0.3},
-    {name: "N", rate: 0.575}
-  ];
-
-  const drawBtn = document.getElementById("drawBtn");
-  const gachaBall = document.getElementById("gachaBall");
-  const cardDiv = document.getElementById("card");
-  const cardImg = document.getElementById("cardImg");
-  const resultName = document.getElementById("resultName");
-  const resultRarity = document.getElementById("resultRarity");
-
-  // レア度からカードを1枚引く関数
-  function drawCard(){
-    const rand = Math.random();
-    let accumulated = 0;
-    let chosenRarity = "N";
-    for(const r of rarities){
-      accumulated += r.rate;
-      if(rand <= accumulated){
-        chosenRarity = r.name;
-        break;
-      }
-    }
-    const candidates = cards.filter(c => c.rarity === chosenRarity);
-    if(candidates.length === 0) return null;
-    return candidates[Math.floor(Math.random() * candidates.length)];
-  }
-
-  drawBtn.addEventListener("click", () => {
-    drawBtn.disabled = true;
-    cardDiv.style.display = "none";
-
-    // ボールを表示、初期位置と透明度設定
-    gachaBall.style.opacity = 1;
-    gachaBall.style.transform = "translateX(100vw) rotate(0deg)";
-    
-    // アニメーション：転がってくる（約2.3秒）
-    gachaBall.style.animation = "rollIn 2.3s ease forwards";
-
-    // 2.3秒後に割れる演出開始
-    setTimeout(() => {
-      // 割れるアニメーション
-      gachaBall.style.animation = "splitOpen 0.7s forwards";
-
-      // 0.7秒後にカード表示
-      setTimeout(() => {
-        gachaBall.style.opacity = 0;
-
-        const card = drawCard();
-        if(card){
-          cardDiv.style.display = "block";
-          cardImg.src = card.img;
-          resultName.textContent = card.name;
-          resultRarity.textContent = `レア度: ${card.rarity}`;
-          cardDiv.className = card.rarity;
-        }
-
-        // ボタン再度押せるようにする
-        drawBtn.disabled = false;
-      }, 700);
-
-    }, 2300);
-  });
-</script>
-</body>
-</html>
+  // SEカード
+  {id:48, name:"SEカード1", rarity:"SE", img:"images/SE1.png"},
+  {id:49, name:"SEカード2", rarity:"SE", img:"images/SE2.png"},
+  {id:50, name:"SEカード3", rarity:"SE", img:"images/SE3.png"},
+];
