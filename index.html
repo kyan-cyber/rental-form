@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>シンプルゲーム</title>
+  <title>矢印キーで動かすゲーム</title>
   <style>
-    #gameCanvas {
-      background: #eee;
+    canvas {
+      background: #f0f0f0;
       display: block;
       margin: 20px auto;
       border: 1px solid #ccc;
@@ -14,44 +14,47 @@
 <body>
   <canvas id="gameCanvas" width="400" height="300"></canvas>
   <script>
-    const canvas = document.getElementById('gameCanvas');
-    const ctx = canvas.getContext('2d');
+    const canvas = document.getElementById("gameCanvas");
+    const ctx = canvas.getContext("2d");
 
-    let x = 50;
-    let y = 50;
-    let dx = 2;
-    let dy = 2;
+    let player = { x: 200, y: 150, speed: 4 };
 
-    function draw() {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      ctx.fillStyle = 'red';
+    const keys = {};
+
+    document.addEventListener("keydown", e => keys[e.key] = true);
+    document.addEventListener("keyup", e => keys[e.key] = false);
+
+    function drawPlayer() {
+      ctx.fillStyle = "red";
       ctx.beginPath();
-      ctx.moveTo(x, y);
-      ctx.lineTo(x + 20, y + 10);
-      ctx.lineTo(x, y + 20);
-      ctx.lineTo(x - 20, y + 10);
+      ctx.moveTo(player.x, player.y);
+      ctx.lineTo(player.x + 10, player.y + 10);
+      ctx.lineTo(player.x, player.y + 20);
+      ctx.lineTo(player.x - 10, player.y + 10);
       ctx.closePath();
       ctx.fill();
-
-      ctx.fillStyle = 'blue';
-      ctx.beginPath();
-      ctx.moveTo(canvas.width - x, canvas.height - y);
-      ctx.lineTo(canvas.width - x + 20, canvas.height - y + 10);
-      ctx.lineTo(canvas.width - x, canvas.height - y + 20);
-      ctx.lineTo(canvas.width - x - 20, canvas.height - y + 10);
-      ctx.closePath();
-      ctx.fill();
-
-      x += dx;
-      y += dy;
-
-      if (x > canvas.width - 20 || x < 20) dx = -dx;
-      if (y > canvas.height - 20 || y < 20) dy = -dy;
-
-      requestAnimationFrame(draw);
     }
 
-    draw();
+    function update() {
+      if (keys["ArrowLeft"]) player.x -= player.speed;
+      if (keys["ArrowRight"]) player.x += player.speed;
+      if (keys["ArrowUp"]) player.y -= player.speed;
+      if (keys["ArrowDown"]) player.y += player.speed;
+
+      // 画面外に出ないようにする
+      player.x = Math.max(10, Math.min(canvas.width - 10, player.x));
+      player.y = Math.max(10, Math.min(canvas.height - 20, player.y));
+    }
+
+    function gameLoop() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      update();
+      drawPlayer();
+      requestAnimationFrame(gameLoop);
+    }
+
+    gameLoop();
   </script>
 </body>
 </html>
+
