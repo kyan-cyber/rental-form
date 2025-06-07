@@ -2,40 +2,95 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8" />
-<title>カード開封ガチャ</title>
+<title>カード開封ガチャ 豪華版</title>
 <style>
-  body { font-family: Arial, sans-serif; text-align: center; margin: 20px; }
+  body { font-family: Arial, sans-serif; text-align: center; margin: 20px; background: #111; color: #eee;}
+  h1 { text-shadow: 0 0 10px #ff0; }
+  #drawBtn {
+    padding: 15px 40px;
+    font-size: 1.5em;
+    font-weight: bold;
+    background: linear-gradient(45deg, #ff6, #fc0);
+    border: none;
+    border-radius: 15px;
+    box-shadow: 0 0 15px #fc0;
+    cursor: pointer;
+    transition: box-shadow 0.3s ease;
+    margin-top: 30px;
+  }
+  #drawBtn:hover {
+    box-shadow: 0 0 30px #fff;
+  }
   #card {
-    margin-top: 20px;
-    border: 2px solid #333;
+    margin: 30px auto;
+    border: 5px solid #333;
     padding: 20px;
-    display: inline-block;
-    width: 250px;
-    border-radius: 10px;
+    width: 280px;
+    border-radius: 15px;
+    background: linear-gradient(135deg, #222, #444);
+    color: #fff;
+    position: relative;
+    overflow: visible;
   }
   #card img {
-    width: 200px;
-    height: 200px;
+    width: 240px;
+    height: 240px;
     object-fit: contain;
-    border-radius: 10px;
+    border-radius: 15px;
+    transform-origin: center;
   }
   .N { border-color: gray; }
-  .R { border-color: blue; }
-  .SR { border-color: purple; }
-  .UR { border-color: orange; }
-  .SE { border-color: red; }
-  #resultName { font-size: 1.2em; margin-top: 10px; }
-  #resultRarity { font-weight: bold; margin-top: 5px; }
-  button {
-    padding: 10px 20px;
+  .R { border-color: #3399ff; }
+  .SR { border-color: #9933ff; }
+  .UR { border-color: #ff9933; }
+  .SE { border-color: #ff3333; }
+  #resultName {
+    font-size: 1.3em;
+    margin-top: 10px;
+    text-shadow: 0 0 10px #000;
+  }
+  #resultRarity {
+    font-weight: bold;
     font-size: 1.1em;
-    cursor: pointer;
+    margin-top: 5px;
+    text-shadow: 0 0 10px #000;
+  }
+  /* アニメーション */
+  @keyframes cardAppear {
+    0% {
+      opacity: 0;
+      transform: rotateY(90deg) scale(0.5);
+    }
+    50% {
+      opacity: 1;
+      transform: rotateY(0deg) scale(1.2);
+    }
+    100% {
+      opacity: 1;
+      transform: rotateY(0deg) scale(1);
+    }
+  }
+  .animate {
+    animation: cardAppear 1.5s ease forwards;
+  }
+  /* レア度別光のエフェクト */
+  .R.effect {
+    box-shadow: 0 0 15px #3399ff;
+  }
+  .SR.effect {
+    box-shadow: 0 0 25px #9933ff;
+  }
+  .UR.effect {
+    box-shadow: 0 0 30px #ff9933;
+  }
+  .SE.effect {
+    box-shadow: 0 0 40px #ff3333;
   }
 </style>
 </head>
 <body>
 
-<h1>カード開封ガチャ</h1>
+<h1>カード開封ガチャ 豪華版</h1>
 <button id="drawBtn">ガチャを引く</button>
 
 <div id="card" style="display:none;">
@@ -45,22 +100,20 @@
 </div>
 
 <script>
-// カードデータ（50枚のうち一部例示。実際は50枚用意してください）
 const cards = [
-  {name:"キャラA", rarity:"N", img:"https://via.placeholder.com/200x200?text=N1"},
-  {name:"モンスターB", rarity:"N", img:"https://via.placeholder.com/200x200?text=N2"},
-  {name:"キャラC", rarity:"R", img:"https://via.placeholder.com/200x200?text=R1"},
-  {name:"モンスターD", rarity:"R", img:"https://via.placeholder.com/200x200?text=R2"},
-  {name:"キャラE", rarity:"SR", img:"https://via.placeholder.com/200x200?text=SR1"},
-  {name:"モンスターF", rarity:"SR", img:"https://via.placeholder.com/200x200?text=SR2"},
-  {name:"キャラG", rarity:"UR", img:"https://via.placeholder.com/200x200?text=UR1"},
-  {name:"モンスターH", rarity:"UR", img:"https://via.placeholder.com/200x200?text=UR2"},
-  {name:"キャラI", rarity:"SE", img:"https://via.placeholder.com/200x200?text=SE1"},
-  {name:"モンスターJ", rarity:"SE", img:"https://via.placeholder.com/200x200?text=SE2"},
-  // ...ここに50枚分カードデータを追加してください
+  {name:"キャラA", rarity:"N", img:"https://via.placeholder.com/240x240?text=N1"},
+  {name:"モンスターB", rarity:"N", img:"https://via.placeholder.com/240x240?text=N2"},
+  {name:"キャラC", rarity:"R", img:"https://via.placeholder.com/240x240?text=R1"},
+  {name:"モンスターD", rarity:"R", img:"https://via.placeholder.com/240x240?text=R2"},
+  {name:"キャラE", rarity:"SR", img:"https://via.placeholder.com/240x240?text=SR1"},
+  {name:"モンスターF", rarity:"SR", img:"https://via.placeholder.com/240x240?text=SR2"},
+  {name:"キャラG", rarity:"UR", img:"https://via.placeholder.com/240x240?text=UR1"},
+  {name:"モンスターH", rarity:"UR", img:"https://via.placeholder.com/240x240?text=UR2"},
+  {name:"キャラI", rarity:"SE", img:"https://via.placeholder.com/240x240?text=SE1"},
+  {name:"モンスターJ", rarity:"SE", img:"https://via.placeholder.com/240x240?text=SE2"},
+  // 実際は50枚に増やしてください
 ];
 
-// レアリティ毎の排出率（合計100）
 const rarityProb = {
   N: 50,
   R: 25,
@@ -76,14 +129,14 @@ function getRandomRarity() {
     sum += rarityProb[rarity];
     if (rand < sum) return rarity;
   }
-  return "N"; // 保険
+  return "N";
 }
 
 function drawCard() {
   const rarity = getRandomRarity();
   const filtered = cards.filter(c => c.rarity === rarity);
   if (filtered.length === 0) {
-    alert("カードデータが不足しています。");
+    alert("カードデータ不足");
     return null;
   }
   const card = filtered[Math.floor(Math.random() * filtered.length)];
@@ -91,17 +144,12 @@ function drawCard() {
 }
 
 document.getElementById("drawBtn").addEventListener("click", () => {
-  const card = drawCard();
-  if (!card) return;
   const cardDiv = document.getElementById("card");
-  document.getElementById("cardImg").src = card.img;
-  document.getElementById("resultName").textContent = card.name;
-  document.getElementById("resultRarity").textContent = card.rarity;
-  cardDiv.className = card.rarity;
-  cardDiv.style.display = "inline-block";
-});
-</script>
-
-</body>
-</html>
-
+  cardDiv.style.display = "none";
+  // モーションのため少し待つ
+  setTimeout(() => {
+    const card = drawCard();
+    if (!card) return;
+    const cardImg = document.getElementById("cardImg");
+    const nameDiv = document.getElementById("resultName");
+    const rarityDiv = docum
