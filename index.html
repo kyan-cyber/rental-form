@@ -1,27 +1,126 @@
-const cards = [
-  // Nカード
-  {id:1, name:"Nカード1", rarity:"N", img:"images/N1.png"},
-  {id:2, name:"Nカード2", rarity:"N", img:"images/N2.png"},
-  // ...
-  {id:25, name:"Nカード25", rarity:"N", img:"images/N25.png"},
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>ガチャシミュレーター</title>
+  <style>
+    body {
+      text-align: center;
+      background: linear-gradient(#f2f2f2, #c9e6ff);
+      font-family: sans-serif;
+    }
+    h1 {
+      margin-top: 30px;
+    }
+    button {
+      padding: 15px 40px;
+      font-size: 24px;
+      margin: 20px;
+      cursor: pointer;
+      background: linear-gradient(45deg, gold, orange);
+      border: none;
+      border-radius: 10px;
+      color: white;
+      box-shadow: 0 4px #999;
+    }
+    button:active {
+      box-shadow: 0 2px #666;
+      transform: translateY(2px);
+    }
+    #result {
+      margin-top: 30px;
+    }
+    #capsule {
+      width: 200px;
+      height: 200px;
+      margin: 0 auto;
+      background: radial-gradient(circle, red, darkred);
+      border-radius: 50%;
+      animation: roll 2s infinite linear;
+    }
+    @keyframes roll {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    #cardImage {
+      max-width: 300px;
+      margin-top: 20px;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <h1>ガチャを引こう！</h1>
+  <button onclick="drawGacha()">ガチャを引く！</button>
+  <div id="result">
+    <div id="capsule" style="display: none;"></div>
+    <img id="cardImage" src="" alt="カード">
+    <p id="cardName"></p>
+  </div>
 
-  // Rカード
-  {id:26, name:"Rカード1", rarity:"R", img:"images/R1.png"},
-  // ...
-  {id:35, name:"Rカード10", rarity:"R", img:"images/R10.png"},
+  <script>
+    const cards = [
+      // Nカード 例：25枚
+      ...Array.from({length: 25}, (_, i) => ({
+        id: i+1,
+        name: `Nカード${i+1}`,
+        rarity: "N",
+        img: `images/N${i+1}.png`
+      })),
+      // Rカード 例：10枚
+      ...Array.from({length: 10}, (_, i) => ({
+        id: i+26,
+        name: `Rカード${i+1}`,
+        rarity: "R",
+        img: `images/R${i+1}.png`
+      })),
+      // SRカード 例：7枚
+      ...Array.from({length: 7}, (_, i) => ({
+        id: i+36,
+        name: `SRカード${i+1}`,
+        rarity: "SR",
+        img: `images/SR${i+1}.png`
+      })),
+      // URカード 例：5枚
+      ...Array.from({length: 5}, (_, i) => ({
+        id: i+43,
+        name: `URカード${i+1}`,
+        rarity: "UR",
+        img: `images/UR${i+1}.png`
+      })),
+      // SEカード 例：3枚
+      ...Array.from({length: 3}, (_, i) => ({
+        id: i+48,
+        name: `SEカード${i+1}`,
+        rarity: "SE",
+        img: `images/SE${i+1}.png`
+      }))
+    ];
 
-  // SRカード
-  {id:36, name:"SRカード1", rarity:"SR", img:"images/SR1.png"},
-  // ...
-  {id:42, name:"SRカード7", rarity:"SR", img:"images/SR7.png"},
+    function getRandomCard() {
+      const rate = Math.random();
+      let pool;
+      if (rate < 0.02) pool = cards.filter(c => c.rarity === "SE");
+      else if (rate < 0.07) pool = cards.filter(c => c.rarity === "UR");
+      else if (rate < 0.18) pool = cards.filter(c => c.rarity === "SR");
+      else if (rate < 0.38) pool = cards.filter(c => c.rarity === "R");
+      else pool = cards.filter(c => c.rarity === "N");
+      return pool[Math.floor(Math.random() * pool.length)];
+    }
 
-  // URカード
-  {id:43, name:"URカード1", rarity:"UR", img:"images/UR1.png"},
-  // ...
-  {id:47, name:"URカード5", rarity:"UR", img:"images/UR5.png"},
+    function drawGacha() {
+      document.getElementById("cardImage").style.display = "none";
+      document.getElementById("cardName").textContent = "";
+      document.getElementById("capsule").style.display = "block";
 
-  // SEカード
-  {id:48, name:"SEカード1", rarity:"SE", img:"images/SE1.png"},
-  {id:49, name:"SEカード2", rarity:"SE", img:"images/SE2.png"},
-  {id:50, name:"SEカード3", rarity:"SE", img:"images/SE3.png"},
-];
+      setTimeout(() => {
+        const card = getRandomCard();
+        document.getElementById("capsule").style.display = "none";
+        document.getElementById("cardImage").src = card.img;
+        document.getElementById("cardImage").style.display = "block";
+        document.getElementById("cardName").textContent = `${card.rarity}：${card.name}`;
+      }, 3000); // 3秒演出
+    }
+  </script>
+</body>
+</html>
