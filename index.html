@@ -34,7 +34,7 @@
     transform: scale(0.95);
   }
   
-  /* ガチャボールのスタイル */
+  /* ガチャボール */
   #gachaBall {
     width: 120px;
     height: 120px;
@@ -42,9 +42,9 @@
     border-radius: 50%;
     margin: 40px auto;
     position: relative;
-    cursor: default;
     user-select: none;
     box-shadow: 0 0 15px #ff4444;
+    opacity: 0;
   }
   
   /* 転がるアニメーション */
@@ -63,53 +63,16 @@
     }
   }
   
-  /* 割れるアニメーション（左右にパカッ） */
-  #gachaBall.split {
-    animation: splitOpen 0.7s forwards;
-  }
+  /* 割れるアニメーション */
   @keyframes splitOpen {
     0% {
-      clip-path: circle(60px at center);
+      opacity: 1;
+      transform: scale(1);
     }
     100% {
-      clip-path: circle(0px at center);
       opacity: 0;
+      transform: scale(1.5);
     }
-  }
-  
-  /* 左右の割れた半球 */
-  .half {
-    width: 60px;
-    height: 120px;
-    background: radial-gradient(circle at 30% 30%, #ff0000, #990000);
-    border-radius: 60px 0 0 60px;
-    position: absolute;
-    top: 0;
-    box-shadow: 0 0 15px #ff4444;
-  }
-  .half.right {
-    left: 60px;
-    border-radius: 0 60px 60px 0;
-  }
-  
-  .half.left {
-    left: 0;
-  }
-
-  /* 左右半球の開く動き */
-  .half.open.left {
-    animation: openLeft 0.7s forwards;
-  }
-  .half.open.right {
-    animation: openRight 0.7s forwards;
-  }
-  @keyframes openLeft {
-    0% { transform: translateX(0) rotate(0deg); }
-    100% { transform: translateX(-80px) rotate(-45deg); opacity: 1; }
-  }
-  @keyframes openRight {
-    0% { transform: translateX(0) rotate(0deg); }
-    100% { transform: translateX(80px) rotate(45deg); opacity: 1; }
   }
   
   /* カード表示 */
@@ -167,14 +130,8 @@
 <h1>カード開封ガチャ</h1>
 <button id="drawBtn">ガチャを引く</button>
 
-<!-- ガチャボール -->
 <div id="gachaBall"></div>
 
-<!-- 割れた半球（最初は非表示） -->
-<div id="leftHalf" class="half left" style="display:none;"></div>
-<div id="rightHalf" class="half right" style="display:none;"></div>
-
-<!-- カード表示 -->
 <div id="card">
   <img id="cardImg" src="" alt="カード画像" />
   <div id="resultName"></div>
@@ -182,16 +139,16 @@
 </div>
 
 <script>
-  // カードデータの例（省略はせず実際は50枚ほど用意してください）
+  // カードデータ（実際は50枚用意してください）
   const cards = [
     {id:1, name:"Nカード1", rarity:"N", img:"https://picsum.photos/seed/N1/240/240"},
     {id:2, name:"Rカード1", rarity:"R", img:"https://picsum.photos/seed/R1/240/240"},
     {id:3, name:"SRカード1", rarity:"SR", img:"https://picsum.photos/seed/SR1/240/240"},
     {id:4, name:"URカード1", rarity:"UR", img:"https://picsum.photos/seed/UR1/240/240"},
     {id:5, name:"SEカード1", rarity:"SE", img:"https://picsum.photos/seed/SE1/240/240"},
-    // ...必要に応じて50枚ほど用意してください
   ];
 
+  // レア度確率（合計1）
   const rarities = [
     {name: "SE", rate: 0.005},
     {name: "UR", rate: 0.02},
@@ -202,13 +159,12 @@
 
   const drawBtn = document.getElementById("drawBtn");
   const gachaBall = document.getElementById("gachaBall");
-  const leftHalf = document.getElementById("leftHalf");
-  const rightHalf = document.getElementById("rightHalf");
   const cardDiv = document.getElementById("card");
   const cardImg = document.getElementById("cardImg");
   const resultName = document.getElementById("resultName");
   const resultRarity = document.getElementById("resultRarity");
 
+  // レア度からカードを1枚引く関数
   function drawCard(){
     const rand = Math.random();
     let accumulated = 0;
@@ -228,5 +184,38 @@
   drawBtn.addEventListener("click", () => {
     drawBtn.disabled = true;
     cardDiv.style.display = "none";
-    cardImg.src
 
+    // ボールを表示、初期位置と透明度設定
+    gachaBall.style.opacity = 1;
+    gachaBall.style.transform = "translateX(100vw) rotate(0deg)";
+    
+    // アニメーション：転がってくる（約2.3秒）
+    gachaBall.style.animation = "rollIn 2.3s ease forwards";
+
+    // 2.3秒後に割れる演出開始
+    setTimeout(() => {
+      // 割れるアニメーション
+      gachaBall.style.animation = "splitOpen 0.7s forwards";
+
+      // 0.7秒後にカード表示
+      setTimeout(() => {
+        gachaBall.style.opacity = 0;
+
+        const card = drawCard();
+        if(card){
+          cardDiv.style.display = "block";
+          cardImg.src = card.img;
+          resultName.textContent = card.name;
+          resultRarity.textContent = `レア度: ${card.rarity}`;
+          cardDiv.className = card.rarity;
+        }
+
+        // ボタン再度押せるようにする
+        drawBtn.disabled = false;
+      }, 700);
+
+    }, 2300);
+  });
+</script>
+</body>
+</html>
