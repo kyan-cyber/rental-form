@@ -4,12 +4,33 @@
   <meta charset="UTF-8">
   <title>シューティングゲーム</title>
   <style>
-    body { margin: 0; overflow: hidden; background: #000; }
-    canvas { display: block; margin: auto; background: #111; }
+    body { margin: 0; overflow: hidden; background: #000; touch-action: none; }
+    canvas { display: block; margin: auto; background: #111; touch-action: none; }
+    #controls {
+      position: fixed;
+      bottom: 10px;
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+    }
+    button {
+      font-size: 20px;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 10px;
+      background-color: #333;
+      color: white;
+    }
   </style>
 </head>
 <body>
   <canvas id="gameCanvas" width="400" height="600"></canvas>
+  <div id="controls">
+    <button id="left">◀</button>
+    <button id="shoot">●</button>
+    <button id="right">▶</button>
+  </div>
   <script>
     const canvas = document.getElementById('gameCanvas');
     const ctx = canvas.getContext('2d');
@@ -27,9 +48,18 @@
     const enemies = [];
     let keys = {};
     let score = 0;
+    let canShoot = true;
 
     document.addEventListener('keydown', e => keys[e.key] = true);
     document.addEventListener('keyup', e => keys[e.key] = false);
+
+    // スマホ用コントロール
+    document.getElementById('left').addEventListener('touchstart', () => keys['ArrowLeft'] = true);
+    document.getElementById('left').addEventListener('touchend', () => keys['ArrowLeft'] = false);
+    document.getElementById('right').addEventListener('touchstart', () => keys['ArrowRight'] = true);
+    document.getElementById('right').addEventListener('touchend', () => keys['ArrowRight'] = false);
+    document.getElementById('shoot').addEventListener('touchstart', () => keys[' '] = true);
+    document.getElementById('shoot').addEventListener('touchend', () => keys[' '] = false);
 
     function spawnEnemy() {
       const type = Math.random() < 0.1 ? 'boss' : (Math.random() < 0.5 ? 'small' : 'large');
@@ -42,12 +72,16 @@
         size = 60; speed = 1; color = 'purple'; hp = 5;
       }
       const x = Math.random() * (canvas.width - size);
-      const dx = (Math.random() - 0.5) * 2; // 左右移動
+      const dx = (Math.random() - 0.5) * 2;
       enemies.push({ x, y: -size, width: size, height: size, color, speed, dx, hp, type });
     }
 
     function shoot() {
-      bullets.push({ x: player.x + player.width / 2 - 2, y: player.y, width: 4, height: 10, color: 'white', speed: 7 });
+      if (canShoot) {
+        bullets.push({ x: player.x + player.width / 2 - 2, y: player.y, width: 4, height: 10, color: 'white', speed: 7 });
+        canShoot = false;
+        setTimeout(() => canShoot = true, 200);
+      }
     }
 
     setInterval(spawnEnemy, 1000);
@@ -65,10 +99,7 @@
       enemies.forEach((e, ei) => {
         e.y += e.speed;
         e.x += e.dx;
-
-        // 壁で反射
         if (e.x < 0 || e.x + e.width > canvas.width) e.dx *= -1;
-
         if (e.y > canvas.height) enemies.splice(ei, 1);
 
         bullets.forEach((b, bi) => {
@@ -98,7 +129,6 @@
         ctx.fillStyle = e.color;
         ctx.fillRect(e.x, e.y, e.width, e.height);
 
-        // HPバー（ボスや大型用）
         if (e.hp > 1) {
           ctx.fillStyle = 'white';
           ctx.fillRect(e.x, e.y - 5, e.width, 4);
@@ -122,3 +152,4 @@
   </script>
 </body>
 </html>
+
