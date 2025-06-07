@@ -1,155 +1,107 @@
 <!DOCTYPE html>
-<html>
+<html lang="ja">
 <head>
-  <meta charset="UTF-8">
-  <title>シューティングゲーム</title>
-  <style>
-    body { margin: 0; overflow: hidden; background: #000; touch-action: none; }
-    canvas { display: block; margin: auto; background: #111; touch-action: none; }
-    #controls {
-      position: fixed;
-      bottom: 10px;
-      width: 100%;
-      display: flex;
-      justify-content: center;
-      gap: 20px;
-    }
-    button {
-      font-size: 20px;
-      padding: 10px 20px;
-      border: none;
-      border-radius: 10px;
-      background-color: #333;
-      color: white;
-    }
-  </style>
+<meta charset="UTF-8" />
+<title>カード開封ガチャ</title>
+<style>
+  body { font-family: Arial, sans-serif; text-align: center; margin: 20px; }
+  #card {
+    margin-top: 20px;
+    border: 2px solid #333;
+    padding: 20px;
+    display: inline-block;
+    width: 250px;
+    border-radius: 10px;
+  }
+  #card img {
+    width: 200px;
+    height: 200px;
+    object-fit: contain;
+    border-radius: 10px;
+  }
+  .N { border-color: gray; }
+  .R { border-color: blue; }
+  .SR { border-color: purple; }
+  .UR { border-color: orange; }
+  .SE { border-color: red; }
+  #resultName { font-size: 1.2em; margin-top: 10px; }
+  #resultRarity { font-weight: bold; margin-top: 5px; }
+  button {
+    padding: 10px 20px;
+    font-size: 1.1em;
+    cursor: pointer;
+  }
+</style>
 </head>
 <body>
-  <canvas id="gameCanvas" width="400" height="600"></canvas>
-  <div id="controls">
-    <button id="left">◀</button>
-    <button id="shoot">●</button>
-    <button id="right">▶</button>
-  </div>
-  <script>
-    const canvas = document.getElementById('gameCanvas');
-    const ctx = canvas.getContext('2d');
 
-    const player = {
-      x: canvas.width / 2 - 15,
-      y: canvas.height - 60,
-      width: 30,
-      height: 30,
-      color: 'blue',
-      speed: 5
-    };
+<h1>カード開封ガチャ</h1>
+<button id="drawBtn">ガチャを引く</button>
 
-    const bullets = [];
-    const enemies = [];
-    let keys = {};
-    let score = 0;
-    let canShoot = true;
+<div id="card" style="display:none;">
+  <img id="cardImg" src="" alt="カード画像" />
+  <div id="resultName"></div>
+  <div id="resultRarity"></div>
+</div>
 
-    document.addEventListener('keydown', e => keys[e.key] = true);
-    document.addEventListener('keyup', e => keys[e.key] = false);
+<script>
+// カードデータ（50枚のうち一部例示。実際は50枚用意してください）
+const cards = [
+  {name:"キャラA", rarity:"N", img:"https://via.placeholder.com/200x200?text=N1"},
+  {name:"モンスターB", rarity:"N", img:"https://via.placeholder.com/200x200?text=N2"},
+  {name:"キャラC", rarity:"R", img:"https://via.placeholder.com/200x200?text=R1"},
+  {name:"モンスターD", rarity:"R", img:"https://via.placeholder.com/200x200?text=R2"},
+  {name:"キャラE", rarity:"SR", img:"https://via.placeholder.com/200x200?text=SR1"},
+  {name:"モンスターF", rarity:"SR", img:"https://via.placeholder.com/200x200?text=SR2"},
+  {name:"キャラG", rarity:"UR", img:"https://via.placeholder.com/200x200?text=UR1"},
+  {name:"モンスターH", rarity:"UR", img:"https://via.placeholder.com/200x200?text=UR2"},
+  {name:"キャラI", rarity:"SE", img:"https://via.placeholder.com/200x200?text=SE1"},
+  {name:"モンスターJ", rarity:"SE", img:"https://via.placeholder.com/200x200?text=SE2"},
+  // ...ここに50枚分カードデータを追加してください
+];
 
-    // スマホ用コントロール
-    document.getElementById('left').addEventListener('touchstart', () => keys['ArrowLeft'] = true);
-    document.getElementById('left').addEventListener('touchend', () => keys['ArrowLeft'] = false);
-    document.getElementById('right').addEventListener('touchstart', () => keys['ArrowRight'] = true);
-    document.getElementById('right').addEventListener('touchend', () => keys['ArrowRight'] = false);
-    document.getElementById('shoot').addEventListener('touchstart', () => keys[' '] = true);
-    document.getElementById('shoot').addEventListener('touchend', () => keys[' '] = false);
+// レアリティ毎の排出率（合計100）
+const rarityProb = {
+  N: 50,
+  R: 25,
+  SR: 15,
+  UR: 7,
+  SE: 3
+};
 
-    function spawnEnemy() {
-      const type = Math.random() < 0.1 ? 'boss' : (Math.random() < 0.5 ? 'small' : 'large');
-      let size, speed, color, hp;
-      if (type === 'small') {
-        size = 20; speed = 3; color = 'lime'; hp = 1;
-      } else if (type === 'large') {
-        size = 40; speed = 1.5; color = 'orange'; hp = 2;
-      } else {
-        size = 60; speed = 1; color = 'purple'; hp = 5;
-      }
-      const x = Math.random() * (canvas.width - size);
-      const dx = (Math.random() - 0.5) * 2;
-      enemies.push({ x, y: -size, width: size, height: size, color, speed, dx, hp, type });
-    }
+function getRandomRarity() {
+  const rand = Math.random() * 100;
+  let sum = 0;
+  for (const rarity in rarityProb) {
+    sum += rarityProb[rarity];
+    if (rand < sum) return rarity;
+  }
+  return "N"; // 保険
+}
 
-    function shoot() {
-      if (canShoot) {
-        bullets.push({ x: player.x + player.width / 2 - 2, y: player.y, width: 4, height: 10, color: 'white', speed: 7 });
-        canShoot = false;
-        setTimeout(() => canShoot = true, 200);
-      }
-    }
+function drawCard() {
+  const rarity = getRandomRarity();
+  const filtered = cards.filter(c => c.rarity === rarity);
+  if (filtered.length === 0) {
+    alert("カードデータが不足しています。");
+    return null;
+  }
+  const card = filtered[Math.floor(Math.random() * filtered.length)];
+  return card;
+}
 
-    setInterval(spawnEnemy, 1000);
+document.getElementById("drawBtn").addEventListener("click", () => {
+  const card = drawCard();
+  if (!card) return;
+  const cardDiv = document.getElementById("card");
+  document.getElementById("cardImg").src = card.img;
+  document.getElementById("resultName").textContent = card.name;
+  document.getElementById("resultRarity").textContent = card.rarity;
+  cardDiv.className = card.rarity;
+  cardDiv.style.display = "inline-block";
+});
+</script>
 
-    function update() {
-      if (keys['ArrowLeft'] && player.x > 0) player.x -= player.speed;
-      if (keys['ArrowRight'] && player.x < canvas.width - player.width) player.x += player.speed;
-      if (keys[' '] || keys['Spacebar']) shoot();
-
-      bullets.forEach((b, i) => {
-        b.y -= b.speed;
-        if (b.y < 0) bullets.splice(i, 1);
-      });
-
-      enemies.forEach((e, ei) => {
-        e.y += e.speed;
-        e.x += e.dx;
-        if (e.x < 0 || e.x + e.width > canvas.width) e.dx *= -1;
-        if (e.y > canvas.height) enemies.splice(ei, 1);
-
-        bullets.forEach((b, bi) => {
-          if (b.x < e.x + e.width && b.x + b.width > e.x && b.y < e.y + e.height && b.y + b.height > e.y) {
-            bullets.splice(bi, 1);
-            e.hp--;
-            if (e.hp <= 0) {
-              enemies.splice(ei, 1);
-              score++;
-            }
-          }
-        });
-      });
-    }
-
-    function draw() {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      ctx.fillStyle = player.color;
-      ctx.fillRect(player.x, player.y, player.width, player.height);
-
-      bullets.forEach(b => {
-        ctx.fillStyle = b.color;
-        ctx.fillRect(b.x, b.y, b.width, b.height);
-      });
-
-      enemies.forEach(e => {
-        ctx.fillStyle = e.color;
-        ctx.fillRect(e.x, e.y, e.width, e.height);
-
-        if (e.hp > 1) {
-          ctx.fillStyle = 'white';
-          ctx.fillRect(e.x, e.y - 5, e.width, 4);
-          ctx.fillStyle = 'red';
-          ctx.fillRect(e.x, e.y - 5, e.width * (e.hp / (e.type === 'boss' ? 5 : 2)), 4);
-        }
-      });
-
-      ctx.fillStyle = 'white';
-      ctx.font = '20px sans-serif';
-      ctx.fillText('Score: ' + score, 10, 25);
-    }
-
-    function gameLoop() {
-      update();
-      draw();
-      requestAnimationFrame(gameLoop);
-    }
-
-    gameLoop();
-  </script>
 </body>
 </html>
 
