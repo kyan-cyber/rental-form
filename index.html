@@ -1,58 +1,142 @@
 <!DOCTYPE html>
-<html>
+<html lang="ja">
 <head>
-  <title>矢印キーで動かすゲーム</title>
+  <meta charset="UTF-8" />
+  <title>シンプル避けゲーム</title>
   <style>
     canvas {
       background: #f0f0f0;
       display: block;
       margin: 20px auto;
-      border: 1px solid #ccc;
+      border: 2px solid #333;
+    }
+    body {
+      text-align: center;
+      font-family: sans-serif;
     }
   </style>
 </head>
 <body>
+  <h1>赤い◇を動かして青い敵をよけよう！</h1>
   <canvas id="gameCanvas" width="400" height="300"></canvas>
+  <p>矢印キーで移動 / 敵に当たるとゲームオーバー / スペースキーで再スタート</p>
   <script>
     const canvas = document.getElementById("gameCanvas");
     const ctx = canvas.getContext("2d");
 
-    let player = { x: 200, y: 150, speed: 4 };
+    let player, enemies, keys, score, gameOver;
 
-    const keys = {};
+    function resetGame() {
+      player = { x: 200, y: 250, size: 10, speed: 4 };
+      enemies = [];
+      score = 0;
+      gameOver = false;
+      keys = {};
+    }
 
-    document.addEventListener("keydown", e => keys[e.key] = true);
-    document.addEventListener("keyup", e => keys[e.key] = false);
+    document.addEventListener("keydown", (e) => {
+      keys[e.key] = true;
+      if (gameOver && e.key === " ") {
+        resetGame();
+      }
+    });
+
+    document.addEventListener("keyup", (e) => {
+      keys[e.key] = false;
+    });
+
+    function spawnEnemy() {
+      const x = Math.random() * (canvas.width - 20) + 10;
+      enemies.push({ x: x, y: -20, size: 10, speed: 2 + Math.random() * 2 });
+    }
 
     function drawPlayer() {
       ctx.fillStyle = "red";
       ctx.beginPath();
       ctx.moveTo(player.x, player.y);
-      ctx.lineTo(player.x + 10, player.y + 10);
-      ctx.lineTo(player.x, player.y + 20);
-      ctx.lineTo(player.x - 10, player.y + 10);
+      ctx.lineTo(player.x + player.size, player.y + player.size);
+      ctx.lineTo(player.x, player.y + player.size * 2);
+      ctx.lineTo(player.x - player.size, player.y + player.size);
+      ctx.closePath();
+      ctx.fill();
+    }
+
+    function drawEnemy(enemy) {
+      ctx.fillStyle = "blue";
+      ctx.beginPath();
+      ctx.moveTo(enemy.x, enemy.y);
+      ctx.lineTo(enemy.x + enemy.size, enemy.y + enemy.size);
+      ctx.lineTo(enemy.x, enemy.y + enemy.size * 2);
+      ctx.lineTo(enemy.x - enemy.size, enemy.y + enemy.size);
       ctx.closePath();
       ctx.fill();
     }
 
     function update() {
+      if (gameOver) return;
+
       if (keys["ArrowLeft"]) player.x -= player.speed;
       if (keys["ArrowRight"]) player.x += player.speed;
       if (keys["ArrowUp"]) player.y -= player.speed;
       if (keys["ArrowDown"]) player.y += player.speed;
 
-      // 画面外に出ないようにする
       player.x = Math.max(10, Math.min(canvas.width - 10, player.x));
       player.y = Math.max(10, Math.min(canvas.height - 20, player.y));
+
+      if (Math.random() < 0.02) spawnEnemy();
+
+      enemies.forEach((enemy) => {
+        enemy.y += enemy.speed;
+      });
+
+      // 敵が画面外に出たら消去してスコア追加
+      enemies = enemies.filter((enemy) => {
+        if (enemy.y > canvas.height) {
+          score++;
+          return false;
+        }
+        return true;
+      });
+
+      // 当たり判定（円形でざっくり）
+      for (let enemy of enemies) {
+        const dx = player.x - enemy.x;
+        const dy = (player.y + player.size) - (enemy.y + enemy.size);
+        const distance = Math.sqrt(dx * dx + dy * dy);
+        if (distance < player.size + enemy.size - 5) {
+          gameOver = true;
+          break;
+        }
+      }
+    }
+
+    function drawScore() {
+      ctx.fillStyle = "black";
+      ctx.font = "16px sans-serif";
+      ctx.fillText(`スコア: ${score}`, 10, 20);
+    }
+
+    function drawGameOver() {
+      ctx.fillStyle = "rgba(0,0,0,0.6)";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = "white";
+      ctx.font = "24px sans-serif";
+      ctx.fillText("ゲームオーバー！", 110, 140);
+      ctx.font = "16px sans-serif";
+      ctx.fillText("スペースキーで再スタート", 100, 170);
     }
 
     function gameLoop() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       update();
       drawPlayer();
+      enemies.forEach(drawEnemy);
+      drawScore();
+      if (gameOver) drawGameOver();
       requestAnimationFrame(gameLoop);
     }
 
+    resetGame();
     gameLoop();
   </script>
 </body>
