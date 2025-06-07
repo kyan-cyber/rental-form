@@ -2,154 +2,197 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8" />
-<title>カード開封ガチャ 豪華版</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>カード開封ガチャ</title>
 <style>
-  body { font-family: Arial, sans-serif; text-align: center; margin: 20px; background: #111; color: #eee;}
-  h1 { text-shadow: 0 0 10px #ff0; }
-  #drawBtn {
-    padding: 15px 40px;
-    font-size: 1.5em;
-    font-weight: bold;
-    background: linear-gradient(45deg, #ff6, #fc0);
-    border: none;
-    border-radius: 15px;
-    box-shadow: 0 0 15px #fc0;
-    cursor: pointer;
-    transition: box-shadow 0.3s ease;
-    margin-top: 30px;
+  body {
+    background: linear-gradient(135deg, #1e2a78, #0b0f2b);
+    color: #fff;
+    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    text-align: center;
+    padding: 20px;
   }
-  #drawBtn:hover {
-    box-shadow: 0 0 30px #fff;
+  h1 {
+    margin-bottom: 20px;
+  }
+  #drawBtn {
+    background: gold;
+    border: none;
+    border-radius: 12px;
+    padding: 15px 40px;
+    font-size: 24px;
+    font-weight: bold;
+    color: #3a1c00;
+    cursor: pointer;
+    box-shadow: 0 0 10px gold;
+    transition: transform 0.2s ease;
+    user-select: none;
+  }
+  #drawBtn:active {
+    transform: scale(0.95);
   }
   #card {
-    margin: 30px auto;
-    border: 5px solid #333;
-    padding: 20px;
-    width: 280px;
-    border-radius: 15px;
-    background: linear-gradient(135deg, #222, #444);
-    color: #fff;
-    position: relative;
-    overflow: visible;
-  }
-  #card img {
+    margin: 40px auto 0;
     width: 240px;
+    height: 320px;
+    border-radius: 20px;
+    background: #222;
+    box-shadow: 0 0 20px #f0c830;
+    position: relative;
+    overflow: hidden;
+    display: none;
+    user-select: none;
+  }
+  #card.animate {
+    animation: shake 1s ease forwards;
+  }
+  @keyframes shake {
+    0% { transform: translateX(0) rotate(0); box-shadow: 0 0 20px #f0c830; }
+    25% { transform: translateX(-10px) rotate(-10deg); box-shadow: 0 0 40px #f0c830; }
+    50% { transform: translateX(10px) rotate(10deg); box-shadow: 0 0 60px #f0c830; }
+    75% { transform: translateX(-10px) rotate(-10deg); box-shadow: 0 0 40px #f0c830; }
+    100% { transform: translateX(0) rotate(0); box-shadow: 0 0 20px #f0c830; }
+  }
+  #cardImg {
+    width: 100%;
     height: 240px;
     object-fit: contain;
-    border-radius: 15px;
-    transform-origin: center;
+    border-bottom: 3px solid #f0c830;
   }
-  .N { border-color: gray; }
-  .R { border-color: #3399ff; }
-  .SR { border-color: #9933ff; }
-  .UR { border-color: #ff9933; }
-  .SE { border-color: #ff3333; }
   #resultName {
-    font-size: 1.3em;
-    margin-top: 10px;
-    text-shadow: 0 0 10px #000;
+    font-size: 22px;
+    margin: 8px 0 0;
   }
   #resultRarity {
-    font-weight: bold;
-    font-size: 1.1em;
-    margin-top: 5px;
-    text-shadow: 0 0 10px #000;
+    font-size: 18px;
+    color: #ffd700;
+    margin-top: 4px;
   }
-  /* アニメーション */
-  @keyframes cardAppear {
-    0% {
-      opacity: 0;
-      transform: rotateY(90deg) scale(0.5);
-    }
-    50% {
-      opacity: 1;
-      transform: rotateY(0deg) scale(1.2);
-    }
-    100% {
-      opacity: 1;
-      transform: rotateY(0deg) scale(1);
-    }
+  /* レア度別カラー */
+  .N {
+    border: 3px solid #bbb;
+    box-shadow: 0 0 10px #bbb;
   }
-  .animate {
-    animation: cardAppear 1.5s ease forwards;
+  .R {
+    border: 3px solid #39a4ff;
+    box-shadow: 0 0 20px #39a4ff;
   }
-  /* レア度別光のエフェクト */
-  .R.effect {
-    box-shadow: 0 0 15px #3399ff;
+  .SR {
+    border: 3px solid #db58ff;
+    box-shadow: 0 0 30px #db58ff;
   }
-  .SR.effect {
-    box-shadow: 0 0 25px #9933ff;
+  .UR {
+    border: 3px solid #ff5c5c;
+    box-shadow: 0 0 40px #ff5c5c;
   }
-  .UR.effect {
-    box-shadow: 0 0 30px #ff9933;
+  .SE {
+    border: 3px solid #ffd700;
+    box-shadow: 0 0 50px #ffd700;
   }
-  .SE.effect {
-    box-shadow: 0 0 40px #ff3333;
-  }
+  /* レア度の文字色も変える */
+  .N #resultRarity { color: #bbb; }
+  .R #resultRarity { color: #39a4ff; }
+  .SR #resultRarity { color: #db58ff; }
+  .UR #resultRarity { color: #ff5c5c; }
+  .SE #resultRarity { color: #ffd700; }
 </style>
 </head>
 <body>
 
-<h1>カード開封ガチャ 豪華版</h1>
+<h1>カード開封ガチャ</h1>
 <button id="drawBtn">ガチャを引く</button>
 
-<div id="card" style="display:none;">
+<div id="card">
   <img id="cardImg" src="" alt="カード画像" />
   <div id="resultName"></div>
   <div id="resultRarity"></div>
 </div>
 
 <script>
-const cards = [
-  {name:"キャラA", rarity:"N", img:"https://via.placeholder.com/240x240?text=N1"},
-  {name:"モンスターB", rarity:"N", img:"https://via.placeholder.com/240x240?text=N2"},
-  {name:"キャラC", rarity:"R", img:"https://via.placeholder.com/240x240?text=R1"},
-  {name:"モンスターD", rarity:"R", img:"https://via.placeholder.com/240x240?text=R2"},
-  {name:"キャラE", rarity:"SR", img:"https://via.placeholder.com/240x240?text=SR1"},
-  {name:"モンスターF", rarity:"SR", img:"https://via.placeholder.com/240x240?text=SR2"},
-  {name:"キャラG", rarity:"UR", img:"https://via.placeholder.com/240x240?text=UR1"},
-  {name:"モンスターH", rarity:"UR", img:"https://via.placeholder.com/240x240?text=UR2"},
-  {name:"キャラI", rarity:"SE", img:"https://via.placeholder.com/240x240?text=SE1"},
-  {name:"モンスターJ", rarity:"SE", img:"https://via.placeholder.com/240x240?text=SE2"},
-  // 実際は50枚に増やしてください
-];
+  // 50枚のカードを用意（ここでは簡易的に名前とランダム画像URLで代用）
+  // 実際は画像ファイルURLを変えるか、外部画像を使う
+  const cards = [];
 
-const rarityProb = {
-  N: 50,
-  R: 25,
-  SR: 15,
-  UR: 7,
-  SE: 3
-};
+  const rarities = [
+    {name: "SE", rate: 0.005},  // 0.5%
+    {name: "UR", rate: 0.02},   // 2%
+    {name: "SR", rate: 0.1},    // 10%
+    {name: "R", rate: 0.3},     // 30%
+    {name: "N", rate: 0.575}    // 57.5%
+  ];
 
-function getRandomRarity() {
-  const rand = Math.random() * 100;
-  let sum = 0;
-  for (const rarity in rarityProb) {
-    sum += rarityProb[rarity];
-    if (rand < sum) return rarity;
+  // レア度別に何枚ずつかを決めてカードを作る例
+  function createCards() {
+    // 各レア度ごとに枚数割当（合計50枚）
+    const counts = {
+      "SE": 1,
+      "UR": 3,
+      "SR": 6,
+      "R": 15,
+      "N": 25
+    };
+    let id = 1;
+    for (const rarity of Object.keys(counts)) {
+      for(let i=0; i<counts[rarity]; i++){
+        cards.push({
+          id: id++,
+          name: rarity + "カード" + (i+1),
+          rarity: rarity,
+          img: `https://picsum.photos/seed/${rarity}${i}/240/240` // ランダム画像を利用（ダミー）
+        });
+      }
+    }
   }
-  return "N";
-}
 
-function drawCard() {
-  const rarity = getRandomRarity();
-  const filtered = cards.filter(c => c.rarity === rarity);
-  if (filtered.length === 0) {
-    alert("カードデータ不足");
-    return null;
+  createCards();
+
+  // ガチャの確率でカードを1枚引く
+  function drawCard(){
+    // まずレア度を決定
+    const rand = Math.random();
+    let accumulated = 0;
+    let chosenRarity = "N";
+    for(const r of rarities){
+      accumulated += r.rate;
+      if(rand <= accumulated){
+        chosenRarity = r.name;
+        break;
+      }
+    }
+
+    // chosenRarityの中からランダムに1枚選ぶ
+    const candidates = cards.filter(c => c.rarity === chosenRarity);
+    if(candidates.length === 0) return null;
+    return candidates[Math.floor(Math.random() * candidates.length)];
   }
-  const card = filtered[Math.floor(Math.random() * filtered.length)];
-  return card;
-}
 
-document.getElementById("drawBtn").addEventListener("click", () => {
-  const cardDiv = document.getElementById("card");
-  cardDiv.style.display = "none";
-  // モーションのため少し待つ
-  setTimeout(() => {
-    const card = drawCard();
-    if (!card) return;
-    const cardImg = document.getElementById("cardImg");
-    const nameDiv = document.getElementById("resultName");
-    const rarityDiv = docum
+  document.getElementById("drawBtn").addEventListener("click", () => {
+    const cardDiv = document.getElementById("card");
+    cardDiv.style.display = "none";
+
+    // ボタンを押したらアニメーションを入れてからカードを表示する
+    setTimeout(() => {
+      const card = drawCard();
+      if (!card) return;
+
+      const cardImg = document.getElementById("cardImg");
+      const nameDiv = document.getElementById("resultName");
+      const rarityDiv = document.getElementById("resultRarity");
+
+      cardImg.src = card.img;
+      nameDiv.textContent = card.name;
+      rarityDiv.textContent = card.rarity;
+
+      cardDiv.className = card.rarity + " effect animate";
+      cardDiv.style.display = "inline-block";
+
+      // アニメーション終わったらクラス外す
+      cardDiv.addEventListener("animationend", () => {
+        cardDiv.classList.remove("animate");
+      }, {once: true});
+    }, 300);
+  });
+</script>
+
+</body>
+</html>
