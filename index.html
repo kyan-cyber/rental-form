@@ -12,9 +12,6 @@
     text-align: center;
     padding: 20px;
   }
-  h1 {
-    margin-bottom: 20px;
-  }
   #drawBtn {
     background: gold;
     border: none;
@@ -36,27 +33,95 @@
   #drawBtn:active:not(:disabled) {
     transform: scale(0.95);
   }
+  
+  /* ガチャボールのスタイル */
+  #gachaBall {
+    width: 120px;
+    height: 120px;
+    background: radial-gradient(circle at 30% 30%, #ff0000, #990000);
+    border-radius: 50%;
+    margin: 40px auto;
+    position: relative;
+    cursor: default;
+    user-select: none;
+    box-shadow: 0 0 15px #ff4444;
+  }
+  
+  /* 転がるアニメーション */
+  @keyframes rollIn {
+    0% {
+      transform: translateX(100vw) rotate(0deg);
+      opacity: 1;
+    }
+    90% {
+      transform: translateX(0) rotate(720deg);
+      opacity: 1;
+    }
+    100% {
+      transform: translateX(0) rotate(720deg);
+      opacity: 1;
+    }
+  }
+  
+  /* 割れるアニメーション（左右にパカッ） */
+  #gachaBall.split {
+    animation: splitOpen 0.7s forwards;
+  }
+  @keyframes splitOpen {
+    0% {
+      clip-path: circle(60px at center);
+    }
+    100% {
+      clip-path: circle(0px at center);
+      opacity: 0;
+    }
+  }
+  
+  /* 左右の割れた半球 */
+  .half {
+    width: 60px;
+    height: 120px;
+    background: radial-gradient(circle at 30% 30%, #ff0000, #990000);
+    border-radius: 60px 0 0 60px;
+    position: absolute;
+    top: 0;
+    box-shadow: 0 0 15px #ff4444;
+  }
+  .half.right {
+    left: 60px;
+    border-radius: 0 60px 60px 0;
+  }
+  
+  .half.left {
+    left: 0;
+  }
+
+  /* 左右半球の開く動き */
+  .half.open.left {
+    animation: openLeft 0.7s forwards;
+  }
+  .half.open.right {
+    animation: openRight 0.7s forwards;
+  }
+  @keyframes openLeft {
+    0% { transform: translateX(0) rotate(0deg); }
+    100% { transform: translateX(-80px) rotate(-45deg); opacity: 1; }
+  }
+  @keyframes openRight {
+    0% { transform: translateX(0) rotate(0deg); }
+    100% { transform: translateX(80px) rotate(45deg); opacity: 1; }
+  }
+  
+  /* カード表示 */
   #card {
-    margin: 40px auto 0;
     width: 240px;
     height: 320px;
-    border-radius: 20px;
     background: #222;
+    margin: 40px auto 0;
+    border-radius: 20px;
     box-shadow: 0 0 20px #f0c830;
-    position: relative;
-    overflow: hidden;
     display: none;
     user-select: none;
-  }
-  #card.animate {
-    animation: shake 1s ease forwards;
-  }
-  @keyframes shake {
-    0% { transform: translateX(0) rotate(0); box-shadow: 0 0 20px #f0c830; }
-    25% { transform: translateX(-10px) rotate(-10deg); box-shadow: 0 0 40px #f0c830; }
-    50% { transform: translateX(10px) rotate(10deg); box-shadow: 0 0 60px #f0c830; }
-    75% { transform: translateX(-10px) rotate(-10deg); box-shadow: 0 0 40px #f0c830; }
-    100% { transform: translateX(0) rotate(0); box-shadow: 0 0 20px #f0c830; }
   }
   #cardImg {
     width: 100%;
@@ -67,6 +132,7 @@
   #resultName {
     font-size: 22px;
     margin: 8px 0 0;
+    color: #fff;
   }
   #resultRarity {
     font-size: 18px;
@@ -94,28 +160,6 @@
     border: 3px solid #ffd700;
     box-shadow: 0 0 50px #ffd700;
   }
-  /* レア度の文字色も変える */
-  .N #resultRarity { color: #bbb; }
-  .R #resultRarity { color: #39a4ff; }
-  .SR #resultRarity { color: #db58ff; }
-  .UR #resultRarity { color: #ff5c5c; }
-  .SE #resultRarity { color: #ffd700; }
-
-  /* ガチャ機の回転演出 */
-  #spinner {
-    margin: 40px auto 0;
-    width: 150px;
-    height: 150px;
-    border: 12px solid #444;
-    border-top: 12px solid gold;
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
-    display: none;
-  }
-  @keyframes spin {
-    0% {transform: rotate(0deg);}
-    100% {transform: rotate(360deg);}
-  }
 </style>
 </head>
 <body>
@@ -123,8 +167,14 @@
 <h1>カード開封ガチャ</h1>
 <button id="drawBtn">ガチャを引く</button>
 
-<div id="spinner"></div>
+<!-- ガチャボール -->
+<div id="gachaBall"></div>
 
+<!-- 割れた半球（最初は非表示） -->
+<div id="leftHalf" class="half left" style="display:none;"></div>
+<div id="rightHalf" class="half right" style="display:none;"></div>
+
+<!-- カード表示 -->
 <div id="card">
   <img id="cardImg" src="" alt="カード画像" />
   <div id="resultName"></div>
@@ -132,7 +182,16 @@
 </div>
 
 <script>
-  const cards = [];
+  // カードデータの例（省略はせず実際は50枚ほど用意してください）
+  const cards = [
+    {id:1, name:"Nカード1", rarity:"N", img:"https://picsum.photos/seed/N1/240/240"},
+    {id:2, name:"Rカード1", rarity:"R", img:"https://picsum.photos/seed/R1/240/240"},
+    {id:3, name:"SRカード1", rarity:"SR", img:"https://picsum.photos/seed/SR1/240/240"},
+    {id:4, name:"URカード1", rarity:"UR", img:"https://picsum.photos/seed/UR1/240/240"},
+    {id:5, name:"SEカード1", rarity:"SE", img:"https://picsum.photos/seed/SE1/240/240"},
+    // ...必要に応じて50枚ほど用意してください
+  ];
+
   const rarities = [
     {name: "SE", rate: 0.005},
     {name: "UR", rate: 0.02},
@@ -141,22 +200,14 @@
     {name: "N", rate: 0.575}
   ];
 
-  function createCards() {
-    const counts = { "SE": 1, "UR": 3, "SR": 6, "R": 15, "N": 25 };
-    let id = 1;
-    for (const rarity of Object.keys(counts)) {
-      for(let i=0; i<counts[rarity]; i++){
-        cards.push({
-          id: id++,
-          name: rarity + "カード" + (i+1),
-          rarity: rarity,
-          img: `https://picsum.photos/seed/${rarity}${i}/240/240`
-        });
-      }
-    }
-  }
-
-  createCards();
+  const drawBtn = document.getElementById("drawBtn");
+  const gachaBall = document.getElementById("gachaBall");
+  const leftHalf = document.getElementById("leftHalf");
+  const rightHalf = document.getElementById("rightHalf");
+  const cardDiv = document.getElementById("card");
+  const cardImg = document.getElementById("cardImg");
+  const resultName = document.getElementById("resultName");
+  const resultRarity = document.getElementById("resultRarity");
 
   function drawCard(){
     const rand = Math.random();
@@ -174,45 +225,8 @@
     return candidates[Math.floor(Math.random() * candidates.length)];
   }
 
-  const drawBtn = document.getElementById("drawBtn");
-  const cardDiv = document.getElementById("card");
-  const spinner = document.getElementById("spinner");
-
   drawBtn.addEventListener("click", () => {
-    // ボタン無効化
     drawBtn.disabled = true;
     cardDiv.style.display = "none";
-    spinner.style.display = "block";
-
-    // 3秒待ってガチャ結果表示
-    setTimeout(() => {
-      spinner.style.display = "none";
-      const card = drawCard();
-      if (!card) {
-        alert("カードが見つかりませんでした");
-        drawBtn.disabled = false;
-        return;
-      }
-
-      const cardImg = document.getElementById("cardImg");
-      const nameDiv = document.getElementById("resultName");
-      const rarityDiv = document.getElementById("resultRarity");
-
-      cardImg.src = card.img;
-      nameDiv.textContent = card.name;
-      rarityDiv.textContent = card.rarity;
-
-      cardDiv.className = card.rarity + " animate";
-      cardDiv.style.display = "inline-block";
-
-      cardDiv.addEventListener("animationend", () => {
-        cardDiv.classList.remove("animate");
-        drawBtn.disabled = false; // ボタンを再び有効化
-      }, {once: true});
-    }, 3000);
-  });
-</script>
-
-</body>
-</html>
+    cardImg.src
 
