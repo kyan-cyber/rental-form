@@ -10,9 +10,9 @@
       color: white;
       font-family: sans-serif;
       text-align: center;
-      padding-top: 50px;
-      margin: 0;
+      padding: 20px;
     }
+
     #gachaButton {
       padding: 20px 40px;
       font-size: 24px;
@@ -22,13 +22,22 @@
       cursor: pointer;
       box-shadow: 0 0 20px gold;
     }
+
+    #cardImage {
+      display: none;
+      max-width: 90%;
+      height: auto;
+      margin-top: 20px;
+      border-radius: 12px;
+    }
+
     #animationContainer {
-      margin: 40px auto;
-      width: 90%;
-      max-width: 300px;
+      margin: 30px auto;
+      width: 300px;
       height: 300px;
       position: relative;
     }
+
     .ball {
       width: 100px;
       height: 100px;
@@ -37,28 +46,26 @@
       position: absolute;
       animation: roll 3s ease-in-out;
     }
+
     @keyframes roll {
       0% { left: -150px; top: 100px; transform: rotate(0deg); }
       50% { left: 150px; top: 60px; transform: rotate(360deg); }
       100% { left: 100px; top: 100px; transform: rotate(720deg); }
     }
-    .card {
-      width: 90%;
-      max-width: 300px;
-      height: auto;
-      margin: 20px auto;
-      display: none;
-    }
+
     .shake {
       animation: shake 0.6s infinite alternate;
     }
+
     .zoom {
       animation: zoom 1.2s ease-out;
     }
+
     @keyframes shake {
       from { transform: rotate(-5deg); }
       to { transform: rotate(5deg); }
     }
+
     @keyframes zoom {
       from { transform: scale(0.2); opacity: 0; }
       to { transform: scale(1); opacity: 1; }
@@ -68,16 +75,16 @@
 <body>
   <h1>カードガチャ</h1>
   <button id="gachaButton">ガチャを引く！</button>
+  <img id="cardImage" src="" alt="カード画像">
   <div id="animationContainer"></div>
-  <img id="cardImage" class="card" src="" alt="カード">
 
   <script>
     const rarities = {
-      N: { rate: 60, count: 25 },
-      R: { rate: 20, count: 10 },
-      SR: { rate: 10, count: 7 },
-      UR: { rate: 7, count: 5 },
-      SE: { rate: 3, count: 4 }
+      N: { rate: 50, count: 25 },
+      R: { rate: 25, count: 10 },
+      SR: { rate: 12, count: 7 },
+      UR: { rate: 8, count: 5 },
+      SE: { rate: 5, count: 4 }
     };
 
     let firstPull = true;
@@ -88,8 +95,7 @@
       for (let rarity in rarities) {
         total += rarities[rarity].rate;
         if (rand <= total) {
-          const count = rarities[rarity].count;
-          const index = Math.floor(Math.random() * count) + 1;
+          const index = Math.floor(Math.random() * rarities[rarity].count) + 1;
           return { rarity, image: `images/${rarity}${index}.png` };
         }
       }
@@ -102,6 +108,7 @@
 
       button.disabled = true;
       cardImage.style.display = "none";
+      cardImage.className = ""; // クラスを初期化
 
       if (firstPull) {
         animationContainer.innerHTML = "<div class='ball'></div>";
@@ -117,7 +124,6 @@
       function showCard() {
         const card = getRandomCard();
         cardImage.src = card.image;
-        cardImage.className = "card";
         if (card.rarity === "UR" || card.rarity === "SE") {
           cardImage.classList.add("zoom");
         } else {
@@ -132,4 +138,3 @@
   </script>
 </body>
 </html>
-
