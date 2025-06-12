@@ -1,5 +1,12 @@
-git init
-git remote add origin https://github.com/kyan-cyber/sound-button-app.git
-git add .
-git commit -m "初回コミット"
-git push -u origin main
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <title>数学問題集</title>
+</head>
+<body>
+  <h1>数学問題集ページ</h1>
+  <p>ここに数学の問題を書きます。</p>
+  <a href="index.html">トップページへ戻る</a>
+</body>
+</html>
