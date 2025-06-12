@@ -2,11 +2,372 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8" />
-  <title>数学問題集</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>モンスター捕獲ゲーム</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      text-align: center;
+      background-color: #f0f8ff;
+      margin-top: 20px;
+    }
+    h1 {
+      color: #333;
+    }
+    button {
+      padding: 10px 20px;
+      font-size: 16px;
+      cursor: pointer;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      margin-top: 10px;
+    }
+    button:hover {
+      background-color: #45a049;
+    }
+    #quizSection {
+      margin-top: 30px;
+      padding: 20px;
+      background-color: #e0f2f7;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      display: none;
+    }
+    #question {
+      font-size: 20px;
+      color: #333;
+      margin-bottom: 15px;
+    }
+    #answer {
+      padding: 10px;
+      font-size: 16px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      width: 60%;
+      max-width: 300px;
+    }
+    #result, #correctAnswer, #message {
+      font-weight: bold;
+      margin-top: 10px;
+      font-size: 18px;
+    }
+    #result.correct {
+      color: #28a745;
+    }
+    #result.incorrect {
+      color: #dc3545;
+    }
+    #monsterImage {
+      /* サイズを若干大きくする */
+      width: 220px;
+      height: 220px;
+      object-fit: contain;
+      margin-top: 20px;
+      display: none;
+    }
+    #ballImage {
+      width: 80px;
+      margin-top: 20px;
+      display: none;
+    }
+    #masterBallInfo {
+      margin-top: 15px;
+      font-size: 16px;
+      color: #007bff;
+      font-weight: bold;
+    }
+    #congratulationsMessage {
+      font-size: 24px;
+      color: #ff4500;
+      font-weight: bold;
+      margin-top: 10px;
+      animation: fadeInOut 2s forwards;
+      display: none;
+    }
+    @keyframes fadeInOut {
+      0% { opacity: 0; }
+      50% { opacity: 1; }
+      100% { opacity: 0; }
+    }
+
+    h2 {
+      margin-top: 40px;
+      color: #333;
+    }
+    #dex {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+      gap: 10px;
+      margin-top: 20px;
+      max-width: 900px;
+      margin-left: auto;
+      margin-right: auto;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      background-color: #fff;
+    }
+    .card {
+      width: 100px;
+      height: 100px;
+      background-color: #333;
+      color: white;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      border-radius: 5px;
+      position: relative;
+    }
+    .card.captured {
+      background-color: transparent;
+      color: black;
+      border: 1px solid #eee;
+    }
+    .card.captured img {
+      width: 90px;
+      height: 90px;
+      object-fit: contain;
+    }
+    .card .monster-name {
+      position: absolute;
+      bottom: 5px;
+      font-size: 10px;
+      background-color: rgba(0, 0, 0, 0.6);
+      color: white;
+      padding: 2px 5px;
+      border-radius: 3px;
+    }
+  </style>
 </head>
 <body>
-  <h1>数学問題集ページ</h1>
-  <p>ここに数学の問題を書きます。</p>
-  <a href="index.html">トップページへ戻る</a>
+  <h1>モンスター捕獲ゲーム</h1>
+  <button onclick="startQuiz()">問題を解いてモンスターを捕獲！</button>
+  <div id="quizSection">
+    <p id="question"></p>
+    <input type="text" id="answer" />
+    <button onclick="checkAnswer()">回答</button>
+    <p id="result"></p>
+    <p id="correctAnswer"></p>
+    <p id="message"></p>
+    <img id="monsterImage" src="" alt="Monster" />
+    <img id="ballImage" src="img/ball.png" alt="Ball" />
+  </div>
+  
+  <p id="masterBallInfo"></p>
+  <p id="congratulationsMessage">Congratulations! 新しいモンスターを捕獲しました！</p>
+
+  ---
+
+  <h2>図鑑</h2>
+  <div id="dex"></div>
+
+  <script>
+    const monsters = [
+      { id: 1, name: "ニャフル", rarity: "common" }, { id: 2, name: "ワンモン", rarity: "common" }, { id: 3, name: "ピョンルン", rarity: "common" }, { id: 4, name: "モモリィ", rarity: "common" }, { id: 5, name: "ピコトリ", rarity: "common" },
+      { id: 6, name: "コバル", rarity: "common" }, { id: 7, name: "ポンチー", rarity: "common" }, { id: 8, name: "クルルン", rarity: "common" }, { id: 9, name: "ミャッピ", rarity: "common" }, { id: 10, name: "サルンル", rarity: "common" },
+      { id: 11, name: "バリッキー", rarity: "uncommon" }, { id: 12, name: "ヴォルガ", rarity: "uncommon" }, { id: 13, name: "ドゴサウル", rarity: "uncommon" }, { id: 14, name: "ギルダン", rarity: "uncommon" }, { id: 15, name: "レオガルド", rarity: "uncommon" },
+      { id: 16, name: "シュヴァルツ", rarity: "rare" }, { id: 17, name: "グロドン", rarity: "rare" }, { id: 18, name: "バルクス", rarity: "rare" }, { id: 19, name: "フレイア", rarity: "rare" },
+      { id: 20, name: "グランクロウ", rarity: "super_rare" }, { id: 21, name: "ビジュール", rarity: "super_rare" }, { id: 22, name: "レギオス", rarity: "super_rare" },
+      { id: 23, name: "シャルグーン", rarity: "legendary" }, { id: 24, name: "ユニコーン", rarity: "legendary" },
+      { id: 25, name: "ネッシー", rarity: "rare" }, { id: 26, name: "マーメイド", rarity: "rare" }, { id: 27, name: "アグニス", rarity: "rare" }
+    ];
+
+    const questions = [
+      { id: 1, word: "tell", meaning: "伝える", sentence: "Can you tell me the time?", correctCount: 0 },
+      { id: 2, word: "Republic", meaning: "共和国", sentence: "France is a republic.", correctCount: 0 },
+      { id: 3, word: "southern", meaning: "南の", sentence: "They live in the southern part of the country.", correctCount: 0 },
+      { id: 4, word: "tip", meaning: "先端", sentence: "Here’s a tip for your homework.", correctCount: 0 },
+      { id: 5, word: "大陸", meaning: "continent", sentence: "Africa is a large continent.", correctCount: 0 },
+      { id: 6, word: "cultural", meaning: "文化の", sentence: "We visited cultural sites.", correctCount: 0 },
+      { id: 7, word: "diversity", meaning: "多様性", sentence: "We celebrate diversity.", correctCount: 0 },
+      { id: 8, word: "diverse", meaning: "多様な", sentence: "The city has a diverse population.", correctCount: 0 },
+      { id: 9, word: "introduce", meaning: "紹介する", sentence: "Let me introduce myself.", correctCount: 0 },
+      { id: 10, word: "through", meaning: "〜を通して", sentence: "I learned English through songs.", correctCount: 0 },
+      { id: 11, word: "amazing", meaning: "驚くべき", sentence: "What an amazing view!", correctCount: 0 },
+      { id: 12, word: "virtual", meaning: "仮想の", sentence: "We had a virtual meeting.", correctCount: 0 },
+      { id: 13, word: "interesting", meaning: "面白い", sentence: "That book is interesting.", correctCount: 0 },
+      { id: 14, word: "何か", meaning: "something", sentence: "I heard something outside.", correctCount: 0 },
+      { id: 15, word: "guess", meaning: "推測する", sentence: "Can you guess the answer?", correctCount: 0 },
+      { id: 16, word: "象", meaning: "elephant", sentence: "The elephant is big.", correctCount: 0 },
+      { id: 17, word: "足跡", meaning: "footprint", sentence: "Look at these footprints.", correctCount: 0 },
+      { id: 18, word: "will", meaning: "〜するつもり", sentence: "I will study hard.", correctCount: 0 },
+      { id: 19, word: "near here", meaning: "この近く", sentence: "Is there a station near here?", correctCount: 0 },
+      { id: 20, word: "they", meaning: "彼らは", sentence: "They are my friends.", correctCount: 0 },
+      { id: 21, word: "to keep", meaning: "〜を保つため", sentence: "They try to keep clean.", correctCount: 0 },
+      { id: 22, word: "泥", meaning: "mud", sentence: "The pig is in the mud.", correctCount: 0 },
+      { id: 23, word: "They like to keep themselves clean and healthy by bathing.", meaning: "彼らは入浴することで清潔で健康でいるのが好きです", sentence: "They like to keep themselves clean and healthy by bathing.", correctCount: 0 }
+    ];
+
+    let captured = Array(monsters.length).fill(false);
+    let currentQuestion = null;
+    let consecutiveCorrects = 0; // 連続正解回数
+    let hasMasterBall = false;   // マスターボール所持フラグ
+
+    // 初期化時に図鑑を更新
+    document.addEventListener('DOMContentLoaded', () => {
+      updateDex();
+      updateMasterBallInfo();
+    });
+
+    function startQuiz() {
+      // 2回以上正解していない問題を優先的に選択
+      const availableQuestions = questions.filter(q => q.correctCount < 2);
+      let q;
+      if (availableQuestions.length > 0) {
+        // 不正解の問題を優先的に選ぶ（correctCountが低いもの）
+        availableQuestions.sort((a, b) => a.correctCount - b.correctCount);
+        q = availableQuestions[0]; // 最も正解回数が少ない問題を選ぶ
+      } else {
+        // 全ての問題を2回以上正解している場合、ランダムに選択
+        q = questions[Math.floor(Math.random() * questions.length)];
+      }
+
+      currentQuestion = q;
+      document.getElementById("question").textContent = `${q.word}：${q.sentence}`;
+      document.getElementById("answer").value = "";
+      document.getElementById("quizSection").style.display = "block";
+      // 画像は問題の下に表示するため、初期状態では非表示
+      document.getElementById("monsterImage").style.display = "none";
+      document.getElementById("ballImage").style.display = "none";
+      document.getElementById("result").textContent = "";
+      document.getElementById("result").className = ""; // クラスをリセット
+      document.getElementById("correctAnswer").textContent = "";
+      document.getElementById("message").textContent = "";
+      document.getElementById("congratulationsMessage").style.display = "none";
+    }
+
+    function checkAnswer() {
+      if (!currentQuestion) return; // 問題が選ばれていない場合は何もしない
+
+      const userAnswer = document.getElementById("answer").value.trim();
+      const isCorrect = userAnswer === currentQuestion.meaning;
+      const resultElement = document.getElementById("result");
+
+      if (isCorrect) {
+        resultElement.textContent = "正解！";
+        resultElement.className = "correct";
+        currentQuestion.correctCount++; // 正解数をインクリメント
+        consecutiveCorrects++; // 連続正解回数をカウント
+        if (consecutiveCorrects >= 3 && !hasMasterBall) {
+          hasMasterBall = true;
+          document.getElementById("message").textContent = "3回連続正解！マスターボールをゲットしました！次の捕獲は100%成功します！";
+          updateMasterBallInfo();
+        } else if (hasMasterBall) {
+            document.getElementById("message").textContent = "マスターボール所持中！";
+        }
+      } else {
+        resultElement.textContent = "不正解...";
+        resultElement.className = "incorrect";
+        document.getElementById("correctAnswer").textContent = `正解：${currentQuestion.meaning}`;
+        consecutiveCorrects = 0; // 不正解で連続正解カウントをリセット
+        hasMasterBall = false; // 不正解でマスターボールを失う
+        updateMasterBallInfo();
+      }
+
+      // モンスター出現ロジック（正解回数と連動）
+      let monsterIndex = 0;
+      const r = Math.random();
+
+      // 問題の正解回数が多いほどレアなモンスターが出やすい
+      // 0-1回の正解: コモン (0-9) 出現率高
+      // 2-3回の正解: アンコモン (10-14) 出現率中
+      // 4回以上の正解: レア以上 (15-26) 出現率低
+      if (currentQuestion.correctCount <= 1) { // 0-1回正解
+        if (r < 0.8) monsterIndex = Math.floor(Math.random() * 10); // Common (0-9)
+        else if (r < 0.95) monsterIndex = 10 + Math.floor(Math.random() * 5); // Uncommon (10-14)
+        else monsterIndex = 15 + Math.floor(Math.random() * 12); // Rare+ (15-26)
+      } else if (currentQuestion.correctCount <= 3) { // 2-3回正解
+        if (r < 0.3) monsterIndex = Math.floor(Math.random() * 10); // Common
+        else if (r < 0.8) monsterIndex = 10 + Math.floor(Math.random() * 5); // Uncommon
+        else if (r < 0.95) monsterIndex = 15 + Math.floor(Math.random() * 7); // Rare (15-21)
+        else monsterIndex = 22 + Math.floor(Math.random() * 5); // Super Rare / Legendary (22-26)
+      } else { // 4回以上正解 (よりレアなモンスターが出やすい)
+        if (r < 0.1) monsterIndex = Math.floor(Math.random() * 10); // Common
+        else if (r < 0.3) monsterIndex = 10 + Math.floor(Math.random() * 5); // Uncommon
+        else if (r < 0.6) monsterIndex = 15 + Math.floor(Math.random() * 7); // Rare
+        else if (r < 0.9) monsterIndex = 22 + Math.floor(Math.random() * 3); // Super Rare
+        else monsterIndex = 25 + Math.floor(Math.random() * 2); // Legendary (25-26)
+      }
+
+      // ファイル名を `id.name.png` の形式で生成
+      document.getElementById("monsterImage").src = `img/${monsters[monsterIndex].id}.${monsters[monsterIndex].name}.png`;
+      document.getElementById("monsterImage").style.display = "block";
+      document.getElementById("ballImage").style.display = "block";
+
+      // 捕獲判定
+      let catchRate = 0.4; // 不正解時の基本捕獲率
+      if (isCorrect) {
+        catchRate = 0.9; // 正解時の基本捕獲率
+      }
+
+      if (hasMasterBall) {
+        catchRate = 1.0; // マスターボールがあれば100%
+        hasMasterBall = false; // マスターボールは1回使うとなくなる
+        updateMasterBallInfo();
+      }
+
+      let capturedSuccessfully = false;
+      if (Math.random() < catchRate) {
+        if (!captured[monsterIndex]) { // 初めて捕獲する場合のみ演出
+          document.getElementById("congratulationsMessage").style.display = "block";
+          setTimeout(() => {
+            document.getElementById("congratulationsMessage").style.display = "none";
+          }, 2000); // 2秒後に消える
+        }
+        captured[monsterIndex] = true;
+        capturedSuccessfully = true;
+        document.getElementById("message").textContent += " モンスターを捕獲しました！";
+      } else {
+        // 捕獲失敗時の逃走判定
+        const escapeRate = 0.3; // 30%の確率で逃走
+        if (Math.random() < escapeRate) {
+          document.getElementById("message").textContent += " モンスターが逃げてしまいました...";
+        } else {
+          document.getElementById("message").textContent += " 捕獲に失敗しました...";
+        }
+      }
+      updateDex();
+    }
+
+    function updateDex() {
+      const dex = document.getElementById("dex");
+      dex.innerHTML = "";
+      monsters.forEach((monster, i) => {
+        const card = document.createElement("div");
+        card.className = "card";
+        if (captured[i]) {
+          card.classList.add("captured");
+          const img = document.createElement("img");
+          // 図鑑表示も id.name.png の形式に修正
+          img.src = `img/${monster.id}.${monster.name}.png`;
+          card.appendChild(img);
+          const nameSpan = document.createElement("span");
+          nameSpan.className = "monster-name";
+          nameSpan.textContent = monster.name;
+          card.appendChild(nameSpan);
+        } else {
+          card.textContent = "???";
+          const nameSpan = document.createElement("span");
+          nameSpan.className = "monster-name";
+          nameSpan.textContent = monster.name;
+          card.appendChild(nameSpan);
+        }
+        dex.appendChild(card);
+      });
+    }
+
+    function updateMasterBallInfo() {
+      const infoElement = document.getElementById("masterBallInfo");
+      if (hasMasterBall) {
+        infoElement.textContent = "マスターボール所持中！次の捕獲は確定！";
+      } else {
+        infoElement.textContent = `連続正解：${consecutiveCorrects}回 (あと${3 - consecutiveCorrects}回でマスターボール)`;
+      }
+    }
+  </script>
 </body>
 </html>
