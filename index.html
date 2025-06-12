@@ -1,140 +1,163 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>カードガチャ</title>
-  <style>
-    body {
-      background: linear-gradient(to bottom right, #000, #333);
-      color: white;
-      font-family: sans-serif;
-      text-align: center;
-      padding: 20px;
-    }
-
-    #gachaButton {
-      padding: 20px 40px;
-      font-size: 24px;
-      background-color: gold;
-      border: none;
-      border-radius: 12px;
-      cursor: pointer;
-      box-shadow: 0 0 20px gold;
-    }
-
-    #cardImage {
-      display: none;
-      max-width: 90%;
-      height: auto;
-      margin-top: 20px;
-      border-radius: 12px;
-    }
-
-    #animationContainer {
-      margin: 30px auto;
-      width: 300px;
-      height: 300px;
-      position: relative;
-    }
-
-    .ball {
-      width: 100px;
-      height: 100px;
-      background-color: red;
-      border-radius: 50%;
-      position: absolute;
-      animation: roll 3s ease-in-out;
-    }
-
-    @keyframes roll {
-      0% { left: -150px; top: 100px; transform: rotate(0deg); }
-      50% { left: 150px; top: 60px; transform: rotate(360deg); }
-      100% { left: 100px; top: 100px; transform: rotate(720deg); }
-    }
-
-    .shake {
-      animation: shake 0.6s infinite alternate;
-    }
-
-    .zoom {
-      animation: zoom 1.2s ease-out;
-    }
-
-    @keyframes shake {
-      from { transform: rotate(-5deg); }
-      to { transform: rotate(5deg); }
-    }
-
-    @keyframes zoom {
-      from { transform: scale(0.2); opacity: 0; }
-      to { transform: scale(1); opacity: 1; }
-    }
-  </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>英単語・熟語ランダムクイズ</title>
+<style>
+  body { font-family: sans-serif; padding: 20px; max-width: 500px; margin: auto; }
+  #question { font-size: 1.2em; margin-bottom: 10px; }
+  input { font-size: 1em; padding: 5px; width: 100%; margin-bottom: 10px; }
+  button { font-size: 1em; padding: 10px; width: 48%; margin-right: 4%; }
+  button:last-child { margin-right: 0; }
+  #result { margin-top: 10px; font-weight: bold; }
+</style>
 </head>
 <body>
-  <h1>カードガチャ</h1>
-  <button id="gachaButton">ガチャを引く！</button>
-  <img id="cardImage" src="" alt="カード画像">
-  <div id="animationContainer"></div>
 
-  <script>
-    const rarities = {
-      N: { rate: 50, count: 25 },
-      R: { rate: 25, count: 10 },
-      SR: { rate: 12, count: 7 },
-      UR: { rate: 8, count: 5 },
-      SE: { rate: 5, count: 4 }
-    };
+<h1>英単語・熟語ランダムクイズ</h1>
 
-    let firstPull = true;
+<div id="question"></div>
+<input type="text" id="answer" placeholder="答えを入力" autocomplete="off" />
+<div>
+  <button id="checkBtn">答え合わせ</button>
+  <button id="nextBtn">次の問題</button>
+</div>
+<div id="result"></div>
 
-    function getRandomCard() {
-      const rand = Math.random() * 100;
-      let total = 0;
-      for (let rarity in rarities) {
-        total += rarities[rarity].rate;
-        if (rand <= total) {
-          const index = Math.floor(Math.random() * rarities[rarity].count) + 1;
-          return { rarity, image: `images/${rarity}${index}.png` };
-        }
-      }
-    }
+<script>
+const wordList = [
+  {en: "hill", jp: "丘"},
+  {en: "reach", jp: "到達する、届く"},
+  {en: "reached", jp: "到達した（reachの過去形）"},
+  {en: "breathtaking", jp: "息をのむような"},
+  {en: "whole", jp: "全体の、全部の"},
+  {en: "hotel", jp: "ホテル"},
+  {en: "wait", jp: "待つ"},
+  {en: "leave", jp: "去る、出発する"},
+  {en: "left", jp: "去った（leaveの過去形）"},
+  {en: "tell", jp: "言う、伝える"},
+  {en: "kill", jp: "殺す"},
+  {en: "Republic", jp: "共和国"},
+  {en: "southern", jp: "南の"},
+  {en: "tip", jp: "先端、ヒント"},
+  {en: "continent", jp: "大陸"},
+  {en: "cultural", jp: "文化の"},
+  {en: "diversity", jp: "多様性"},
+  {en: "diverse", jp: "多様な"},
+  {en: "introduce", jp: "紹介する"},
+  {en: "through", jp: "～を通して"},
+  {en: "amazing", jp: "驚くべき"},
+  {en: "virtual", jp: "仮想の"},
+  {en: "interesting", jp: "興味深い"},
+  {en: "something", jp: "何か"},
+  {en: "guess", jp: "推測する"},
+  {en: "elephant", jp: "象"},
+  {en: "footprints", jp: "足跡（複数形）"},
+  {en: "mud", jp: "泥"},
+  {en: "will", jp: "～するつもり（助動詞）"},
+  {en: "near here", jp: "この近くに"},
+  {en: "they", jp: "彼ら"},
+  {en: "to keep", jp: "保つために"},
+  {en: "ever", jp: "今までに、これまで（疑問・否定文で使用）"},
+  {en: "see", jp: "見る"},
+  {en: "seen", jp: "見られた（seeの過去分詞）"},
+  {en: "recently", jp: "最近"},
+  {en: "reason", jp: "理由"},
+  {en: "return", jp: "戻る"},
+  {en: "such", jp: "そのような"},
+  {en: "like that", jp: "あのような"},
+  {en: "conservation", jp: "保護（自然・環境などの）"},
+  {en: "monitor", jp: "監視する、見守る"},
+  {en: "rhinos", jp: "サイ（複数形）"},
+  {en: "horns", jp: "角（複数形）"},
+  {en: "terrible", jp: "ひどい、恐ろしい"},
+  {en: "safely", jp: "安全に"},
+  {en: "savanna", jp: "サバンナ（草原地帯）"},
+  {en: "ecosystem", jp: "生態系"},
+  {en: "living thing", jp: "生き物"},
+  {en: "connected", jp: "つながった"},
+  {en: "connect", jp: "つなぐ"},
+  {en: "circle", jp: "輪、円"},
+  {en: "humans", jp: "人間（複数形）"},
+  {en: "human", jp: "人間"}
+];
 
-    function pullGacha() {
-      const button = document.getElementById("gachaButton");
-      const animationContainer = document.getElementById("animationContainer");
-      const cardImage = document.getElementById("cardImage");
+const phraseList = [
+  {en: "Wait a minute.", jp: "ちょっと待って。"},
+  {en: "What’s wrong?", jp: "どうかしたの？"},
+  {en: "Hurry up.", jp: "急いで。"},
+  {en: "Be careful.", jp: "気をつけて。"},
+  {en: "This way.", jp: "（案内するときに）こちらです。"},
+  {en: "travel back in time", jp: "時間をさかのぼって旅をする（タイムトラベル）"},
+  {en: "a breathtaking", jp: "息をのむような"},
+  {en: "catch up with ~", jp: "～に追いつく"},
+  {en: "What’s up with ~ ?", jp: "～はどうしたんだろう"},
+  {en: "big deal", jp: "たいしたこと"},
+  {en: "cut off ~", jp: "～を切り離す、遮断する"},
+  {en: "so that ~", jp: "～するために、～できるように（目的）"}
+];
 
-      button.disabled = true;
-      cardImage.style.display = "none";
-      cardImage.className = ""; // クラスを初期化
+// 単語＋フレーズをまとめる
+const allList = wordList.concat(phraseList);
 
-      if (firstPull) {
-        animationContainer.innerHTML = "<div class='ball'></div>";
-        setTimeout(() => {
-          showCard();
-          animationContainer.innerHTML = "";
-          firstPull = false;
-        }, 3000);
-      } else {
-        showCard();
-      }
+let currentQA = null;
+let askEnglish = true; // trueなら英語→日本語、falseなら日本語→英語
 
-      function showCard() {
-        const card = getRandomCard();
-        cardImage.src = card.image;
-        if (card.rarity === "UR" || card.rarity === "SE") {
-          cardImage.classList.add("zoom");
-        } else {
-          cardImage.classList.add("shake");
-        }
-        cardImage.style.display = "block";
-        button.disabled = false;
-      }
-    }
+const questionEl = document.getElementById("question");
+const answerEl = document.getElementById("answer");
+const resultEl = document.getElementById("result");
+const checkBtn = document.getElementById("checkBtn");
+const nextBtn = document.getElementById("nextBtn");
 
-    document.getElementById("gachaButton").addEventListener("click", pullGacha);
-  </script>
+function pickRandomQA() {
+  const idx = Math.floor(Math.random() * allList.length);
+  currentQA = allList[idx];
+  askEnglish = Math.random() < 0.5; // 50%で出題形式を切り替え
+}
+
+function showQuestion() {
+  answerEl.value = "";
+  resultEl.textContent = "";
+  if (askEnglish) {
+    questionEl.textContent = `英語の意味は？: 「${currentQA.en}」`;
+  } else {
+    questionEl.textContent = `英語に訳してね: 「${currentQA.jp}」`;
+  }
+  answerEl.focus();
+}
+
+function normalize(text) {
+  return text.trim().toLowerCase();
+}
+
+checkBtn.addEventListener("click", () => {
+  const userAnswer = normalize(answerEl.value);
+  if (userAnswer === "") {
+    alert("答えを入力してください。");
+    return;
+  }
+  let correctAnswer = askEnglish ? normalize(currentQA.jp) : normalize(currentQA.en);
+
+  // 簡易チェック（部分一致もOKにする場合はここを調整）
+  if (correctAnswer.includes(userAnswer) || userAnswer.includes(correctAnswer)) {
+    resultEl.style.color = "green";
+    resultEl.textContent = "正解！";
+  } else {
+    resultEl.style.color = "red";
+    resultEl.textContent = `不正解。正解は: ${correctAnswer}`;
+  }
+});
+
+nextBtn.addEventListener("click", () => {
+  pickRandomQA();
+  showQuestion();
+});
+
+// 初回表示
+pickRandomQA();
+showQuestion();
+</script>
+
 </body>
 </html>
