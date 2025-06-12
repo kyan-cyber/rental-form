@@ -1,213 +1,164 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
-<title>英単語・熟語ランダムクイズ</title>
-<style>
-  body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    padding: 20px;
-    max-width: 600px;
-    margin: auto;
-    background: #f0f8ff;
-    color: #222;
-  }
-  h1 {
-    font-size: 2.4rem;
-    text-align: center;
-    margin-bottom: 30px;
-    color: #004080;
-  }
-  #question {
-    font-size: 2rem;
-    margin-bottom: 20px;
-    background: #e6f0ff;
-    padding: 15px 20px;
-    border-radius: 12px;
-    box-shadow: 0 4px 10px rgba(0, 64, 128, 0.2);
-  }
-  #answer {
-    font-size: 1.6rem;
-    padding: 15px 15px;
-    width: 100%;
-    border-radius: 12px;
-    border: 2px solid #004080;
-    margin-bottom: 25px;
-    box-sizing: border-box;
-    transition: border-color 0.3s ease;
-  }
-  #answer:focus {
-    outline: none;
-    border-color: #0070ff;
-    background-color: #eaf4ff;
-  }
-  .btn-container {
-    display: flex;
-    justify-content: space-between;
-    gap: 15px;
-  }
-  button {
-    flex: 1;
-    font-size: 1.8rem;
-    font-weight: bold;
-    padding: 15px 0;
-    border-radius: 15px;
-    border: none;
-    cursor: pointer;
-    color: #fff;
-    background: linear-gradient(45deg, #0070ff, #00bfff);
-    box-shadow: 0 6px 15px rgba(0, 123, 255, 0.5);
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-    user-select: none;
-  }
-  button:active {
-    transform: scale(0.95);
-    box-shadow: 0 3px 8px rgba(0, 123, 255, 0.7);
-  }
-  button:hover {
-    background: linear-gradient(45deg, #00bfff, #0070ff);
-    box-shadow: 0 8px 20px rgba(0, 191, 255, 0.7);
-  }
-  #result {
-    margin-top: 20px;
-    font-size: 1.8rem;
-    font-weight: 700;
-    color: #00509e;
-    text-align: center;
-    min-height: 40px;
-  }
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>英語クイズ</title>
+  <style>
+    body {
+      font-family: "Arial", sans-serif;
+      text-align: center;
+      background-color: #f0f8ff;
+      padding: 30px;
+    }
+
+    h1 {
+      font-size: 1.8rem;
+      margin-bottom: 30px;
+      color: #004080;
+    }
+
+    #question {
+      font-size: 2rem;
+      margin: 30px 0;
+    }
+
+    #answer {
+      font-size: 1.8rem;
+      color: #008000;
+      margin: 20px 0;
+    }
+
+    .button {
+      padding: 20px 30px;
+      font-size: 1.4rem;
+      border: none;
+      border-radius: 15px;
+      margin: 15px;
+      cursor: pointer;
+      transition: transform 0.2s ease, background-color 0.3s ease;
+    }
+
+    .button:hover {
+      transform: scale(1.05);
+    }
+
+    #showAnswerBtn {
+      background-color: #ffcc00;
+    }
+
+    #nextBtn {
+      background-color: #1e90ff;
+      color: white;
+    }
+
+    #showAnswerBtn:hover {
+      background-color: #ffdd33;
+    }
+
+    #nextBtn:hover {
+      background-color: #3399ff;
+    }
+  </style>
 </head>
 <body>
 
-<h1>英単語・熟語ランダムクイズ</h1>
+  <h1>英語クイズ</h1>
 
-<div id="question"></div>
-<input type="text" id="answer" placeholder="答えを入力（任意）" autocomplete="off" />
-<div class="btn-container">
-  <button id="showAnswerBtn">答えを表示</button>
-  <button id="nextBtn">次の問題</button>
-</div>
-<div id="result"></div>
+  <div id="question">Loading...</div>
+  <div id="answer" style="display: none;"></div>
 
-<script>
-const wordList = [
-  {en: "hill", jp: "丘"},
-  {en: "reach", jp: "到達する、届く"},
-  {en: "reached", jp: "到達した（reachの過去形）"},
-  {en: "breathtaking", jp: "息をのむような"},
-  {en: "whole", jp: "全体の、全部の"},
-  {en: "hotel", jp: "ホテル"},
-  {en: "wait", jp: "待つ"},
-  {en: "leave", jp: "去る、出発する"},
-  {en: "left", jp: "去った（leaveの過去形）"},
-  {en: "tell", jp: "言う、伝える"},
-  {en: "kill", jp: "殺す"},
-  {en: "Republic", jp: "共和国"},
-  {en: "southern", jp: "南の"},
-  {en: "tip", jp: "先端、ヒント"},
-  {en: "continent", jp: "大陸"},
-  {en: "cultural", jp: "文化の"},
-  {en: "diversity", jp: "多様性"},
-  {en: "diverse", jp: "多様な"},
-  {en: "introduce", jp: "紹介する"},
-  {en: "through", jp: "～を通して"},
-  {en: "amazing", jp: "驚くべき"},
-  {en: "virtual", jp: "仮想の"},
-  {en: "interesting", jp: "興味深い"},
-  {en: "something", jp: "何か"},
-  {en: "guess", jp: "推測する"},
-  {en: "elephant", jp: "象"},
-  {en: "footprints", jp: "足跡（複数形）"},
-  {en: "mud", jp: "泥"},
-  {en: "will", jp: "～するつもり（助動詞）"},
-  {en: "near here", jp: "この近くに"},
-  {en: "they", jp: "彼ら"},
-  {en: "to keep", jp: "保つために"},
-  {en: "ever", jp: "今までに、これまで（疑問・否定文で使用）"},
-  {en: "see", jp: "見る"},
-  {en: "seen", jp: "見られた（seeの過去分詞）"},
-  {en: "recently", jp: "最近"},
-  {en: "reason", jp: "理由"},
-  {en: "return", jp: "戻る"},
-  {en: "such", jp: "そのような"},
-  {en: "like that", jp: "あのような"},
-  {en: "conservation", jp: "保護（自然・環境などの）"},
-  {en: "monitor", jp: "監視する、見守る"},
-  {en: "rhinos", jp: "サイ（複数形）"},
-  {en: "horns", jp: "角（複数形）"},
-  {en: "terrible", jp: "ひどい、恐ろしい"},
-  {en: "safely", jp: "安全に"},
-  {en: "savanna", jp: "サバンナ（草原地帯）"},
-  {en: "ecosystem", jp: "生態系"},
-  {en: "living thing", jp: "生き物"},
-  {en: "connected", jp: "つながった"},
-  {en: "connect", jp: "つなぐ"},
-  {en: "circle", jp: "輪、円"},
-  {en: "humans", jp: "人間（複数形）"},
-  {en: "human", jp: "人間"}
-];
+  <button class="button" id="showAnswerBtn">答えを見る</button>
+  <button class="button" id="nextBtn">次の問題</button>
 
-const phraseList = [
-  {en: "Wait a minute.", jp: "ちょっと待って。"},
-  {en: "What’s wrong?", jp: "どうかしたの？"},
-  {en: "Hurry up.", jp: "急いで。"},
-  {en: "Be careful.", jp: "気をつけて。"},
-  {en: "This way.", jp: "（案内するときに）こちらです。"},
-  {en: "travel back in time", jp: "時間をさかのぼって旅をする（タイムトラベル）"},
-  {en: "a breathtaking", jp: "息をのむような"},
-  {en: "catch up with ~", jp: "～に追いつく"},
-  {en: "What’s up with ~ ?", jp: "～はどうしたんだろう"},
-  {en: "big deal", jp: "たいしたこと"},
-  {en: "cut off ~", jp: "～を切り離す、遮断する"},
-  {en: "so that ~", jp: "～するために、～できるように（目的）"}
-];
+  <script>
+    const vocab = [
+      { en: "hotel", ja: "ホテル" },
+      { en: "wait", ja: "待つ" },
+      { en: "leave", ja: "去る、出発する" },
+      { en: "left", ja: "去った、出発した（leaveの過去形）" },
+      { en: "hill", ja: "丘" },
+      { en: "reach", ja: "到達する、届く" },
+      { en: "reached", ja: "到達した（reachの過去形）" },
+      { en: "breathtaking", ja: "息をのむような" },
+      { en: "whole", ja: "全体の、全部の" },
+      { en: "tell", ja: "言う、伝える" },
+      { en: "kill", ja: "殺す" },
+      { en: "Republic", ja: "共和国" },
+      { en: "southern", ja: "南の" },
+      { en: "tip", ja: "先端、ヒント" },
+      { en: "continent", ja: "大陸" },
+      { en: "cultural", ja: "文化の" },
+      { en: "diversity", ja: "多様性" },
+      { en: "diverse", ja: "多様な" },
+      { en: "introduce", ja: "紹介する" },
+      { en: "through", ja: "～を通して" },
+      { en: "amazing", ja: "驚くべき" },
+      { en: "virtual", ja: "仮想の" },
+      { en: "interesting", ja: "興味深い" },
+      { en: "something", ja: "何か" },
+      { en: "guess", ja: "推測する" },
+      { en: "elephant", ja: "象" },
+      { en: "footprints", ja: "足跡" },
+      { en: "mud", ja: "泥" },
+      { en: "will", ja: "～するつもり" },
+      { en: "near here", ja: "この近くに" },
+      { en: "they", ja: "彼ら" },
+      { en: "to keep", ja: "保つために" },
+      { en: "ever", ja: "今までに" },
+      { en: "seen", ja: "見た（過去分詞）" },
+      { en: "recently", ja: "最近" },
+      { en: "reason", ja: "理由" },
+      { en: "return", ja: "戻る" },
+      { en: "such", ja: "そのような" },
+      { en: "like that", ja: "あのような" },
+      { en: "conservation", ja: "保護" },
+      { en: "monitor", ja: "監視する" },
+      { en: "rhinos", ja: "サイたち" },
+      { en: "horns", ja: "角" },
+      { en: "terrible", ja: "ひどい、恐ろしい" },
+      { en: "safely", ja: "安全に" },
+      { en: "savanna", ja: "サバンナ" },
+      { en: "ecosystem", ja: "生態系" },
+      { en: "living thing", ja: "生き物" },
+      { en: "connected", ja: "つながった" },
+      { en: "circle", ja: "輪、円" },
+      { en: "humans", ja: "人間たち" },
+      { en: "Wait a minute.", ja: "ちょっと待って。" },
+      { en: "What’s wrong?", ja: "どうかしたの？" },
+      { en: "Hurry up.", ja: "急いで。" },
+      { en: "Be careful.", ja: "気をつけて。" },
+      { en: "This way.", ja: "こちらです。" },
+      { en: "travel back in time", ja: "時間をさかのぼって旅をする" },
+      { en: "a breathtaking", ja: "息をのむような" },
+      { en: "catch up with", ja: "～に追いつく" },
+      { en: "What’s up with", ja: "～はどうしたんだろう" },
+      { en: "big deal", ja: "たいしたこと" },
+      { en: "cut off", ja: "切り離す、遮断する" },
+      { en: "so that", ja: "～するために" }
+    ];
 
-const allList = wordList.concat(phraseList);
+    let current = {};
+    let isJapaneseToEnglish = true;
 
-let currentQA = null;
-let askEnglish = true;
+    function getRandomQuestion() {
+      current = vocab[Math.floor(Math.random() * vocab.length)];
+      isJapaneseToEnglish = Math.random() < 0.5;
+      document.getElementById("question").textContent = isJapaneseToEnglish ? current.ja : current.en;
+      document.getElementById("answer").style.display = "none";
+    }
 
-const questionEl = document.getElementById("question");
-const answerEl = document.getElementById("answer");
-const resultEl = document.getElementById("result");
-const showAnswerBtn = document.getElementById("showAnswerBtn");
-const nextBtn = document.getElementById("nextBtn");
+    document.getElementById("showAnswerBtn").addEventListener("click", () => {
+      document.getElementById("answer").textContent = isJapaneseToEnglish ? current.en : current.ja;
+      document.getElementById("answer").style.display = "block";
+    });
 
-function pickRandomQA() {
-  const idx = Math.floor(Math.random() * allList.length);
-  currentQA = allList[idx];
-  askEnglish = Math.random() < 0.5;
-}
+    document.getElementById("nextBtn").addEventListener("click", () => {
+      getRandomQuestion();
+    });
 
-function showQuestion() {
-  answerEl.value = "";
-  resultEl.textContent = "";
-  if (askEnglish) {
-    questionEl.textContent = `英語の意味は？: 「${currentQA.en}」`;
-  } else {
-    questionEl.textContent = `英語に訳してね: 「${currentQA.jp}」`;
-  }
-  answerEl.focus();
-}
+    getRandomQuestion(); // 最初の問題を表示
+  </script>
+</body>
+</html>
 
-showAnswerBtn.addEventListener("click", () => {
-  if (askEnglish) {
-    resultEl.textContent = `答え（日本語）: ${currentQA.jp}`;
-  } else {
-    resultEl.textContent = `答え（英語）: ${currentQA.en}`;
-  }
-});
-
-nextBtn.addEventListener("click", () => {
-  pickRandomQA();
-  showQuestion();
-  resultEl.textContent = "";
-});
-
-pickRandomQA();
-showQuestion();
-</script>
-
-</
