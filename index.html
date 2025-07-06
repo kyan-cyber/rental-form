@@ -1,207 +1,435 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>英語クイズ</title>
-  <style>
-    body {
-      font-family: "Arial", sans-serif;
-      text-align: center;
-      background-color: #f0f8ff;
-      padding: 30px;
-    }
-
-    h1 {
-      font-size: 1.8rem;
-      margin-bottom: 30px;
-      color: #004080;
-    }
-
-    #question {
-      font-size: 2rem;
-      margin: 30px 0;
-    }
-
-    #answer {
-      font-size: 1.8rem;
-      color: #008000;
-      margin: 20px 0;
-    }
-
-    .button {
-      padding: 20px 30px;
-      font-size: 1.4rem;
-      border: none;
-      border-radius: 15px;
-      margin: 15px;
-      cursor: pointer;
-      transition: transform 0.2s ease, background-color 0.3s ease;
-    }
-
-    .button:hover {
-      transform: scale(1.05);
-    }
-
-    #showAnswerBtn {
-      background-color: #ffcc00;
-    }
-
-    #correctBtn {
-      background-color: #4CAF50;
-      color: white;
-      display: none;
-    }
-
-    #wrongBtn {
-      background-color: #f44336;
-      color: white;
-      display: none;
-    }
-
-    #score {
-      font-size: 1.5rem;
-      margin-top: 20px;
-      color: #333;
-    }
-  </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>英単語学習（日別50語）</title>
+<style>
+  body { font-family: sans-serif; padding: 20px; max-width: 600px; margin: auto; }
+  h1 { text-align: center; }
+  #day-buttons button { margin: 5px; padding: 10px 15px; }
+  #day-buttons button:disabled { background: #ccc; cursor: not-allowed; }
+  #card { border: 1px solid #ddd; padding: 20px; border-radius: 8px; margin-top: 20px; }
+  #english { font-size: 1.5em; font-weight: bold; }
+  #japanese { margin: 15px 0; font-size: 1.3em; color: #333; display: none; }
+  button { margin: 5px; padding: 10px 20px; font-size: 1em; }
+  #progress { margin-top: 10px; font-weight: bold; }
+</style>
 </head>
 <body>
 
-  <h1>英語クイズ</h1>
+<h1>英単語学習（日別50語）</h1>
 
-  <div id="question">Loading...</div>
-  <div id="answer" style="display: none;"></div>
+<div id="day-buttons"></div>
 
-  <button class="button" id="showAnswerBtn">答えを見る</button>
-  <button class="button" id="correctBtn">正解！</button>
-  <button class="button" id="wrongBtn">不正解</button>
+<div id="card" style="display:none;">
+  <div id="english"></div>
+  <div id="japanese"></div>
+  <button id="show-answer-btn">答えを見る</button>
+  <button id="ok-btn" style="display:none;">OK</button>
+  <button id="miss-btn" style="display:none;">ミス</button>
+  <div id="progress"></div>
+</div>
 
-  <div id="score"></div>
+<script>
+// --- 単語データ（日毎、英語\t日本語） ---
+const vocabTextByDay = [
+`I\t私
+you\tあなた
+he\t彼
+she\t彼女
+it\tそれ
+we\t私たち
+they\t彼ら
+this\tこれ
+that\tあれ
+these\tこれら
+those\tあれら
+a\t一つの
+an\t一つの（母音の前）
+the\tその
+my\t私の
+your\tあなたの
+his\t彼の
+her\t彼女の
+its\tそれの
+our\t私たちの
+their\t彼らの
+am\t～です（Iに使う）
+is\t～です（he / she / itに使う）
+are\t～です（you / we / theyに使う）
+yes\tはい
+no\tいいえ
+not\t～でない
+hello\tこんにちは
+hi\tやあ
+good\t良い
+morning\t朝
+afternoon\t午後
+evening\t夕方
+night\t夜
+goodbye\tさようなら
+bye\tバイバイ
+thank\tありがとう
+thanks\tありがとう
+sorry\tごめんなさい
+please\tお願いします
+OK\tわかりました
+see\t見る
+look\t見る
+watch\t見る（じっと）
+listen\t聞く
+hear\t聞こえる
+speak\t話す
+say\t言う
+talk\t話す
+read\t読む`,
 
-  <script>
-    const vocab = [
-      { en: "hotel", ja: "ホテル" },
-      { en: "wait", ja: "待つ" },
-      { en: "leave", ja: "去る、出発する" },
-      { en: "left", ja: "去った、出発した（leaveの過去形）" },
-      { en: "hill", ja: "丘" },
-      { en: "reach", ja: "到達する、届く" },
-      { en: "reached", ja: "到達した（reachの過去形）" },
-      { en: "breathtaking", ja: "息をのむような" },
-      { en: "whole", ja: "全体の、全部の" },
-      { en: "tell", ja: "言う、伝える" },
-      { en: "kill", ja: "殺す" },
-      { en: "Republic", ja: "共和国" },
-      { en: "southern", ja: "南の" },
-      { en: "tip", ja: "先端、ヒント" },
-      { en: "continent", ja: "大陸" },
-      { en: "cultural", ja: "文化の" },
-      { en: "diversity", ja: "多様性" },
-      { en: "diverse", ja: "多様な" },
-      { en: "introduce", ja: "紹介する" },
-      { en: "through", ja: "～を通して" },
-      { en: "amazing", ja: "驚くべき" },
-      { en: "virtual", ja: "仮想の" },
-      { en: "interesting", ja: "興味深い" },
-      { en: "something", ja: "何か" },
-      { en: "guess", ja: "推測する" },
-      { en: "elephant", ja: "象" },
-      { en: "footprints", ja: "足跡（複数形）" },
-      { en: "mud", ja: "泥" },
-      { en: "will", ja: "～するつもり（助動詞）" },
-      { en: "near here", ja: "この近くに" },
-      { en: "they", ja: "彼ら" },
-      { en: "to keep", ja: "保つために" },
-      { en: "ever", ja: "今までに、これまで" },
-      { en: "seen", ja: "見た（seeの過去分詞）" },
-      { en: "recently", ja: "最近" },
-      { en: "reason", ja: "理由" },
-      { en: "return", ja: "戻る" },
-      { en: "such", ja: "そのような" },
-      { en: "like that", ja: "あのような" },
-      { en: "conservation", ja: "保護" },
-      { en: "monitor", ja: "監視する" },
-      { en: "rhinos", ja: "サイ（複数形）" },
-      { en: "horns", ja: "角（複数形）" },
-      { en: "terrible", ja: "ひどい、恐ろしい" },
-      { en: "safely", ja: "安全に" },
-      { en: "savanna", ja: "サバンナ" },
-      { en: "ecosystem", ja: "生態系" },
-      { en: "living thing", ja: "生き物" },
-      { en: "connected", ja: "つながった" },
-      { en: "circle", ja: "輪、円" },
-      { en: "humans", ja: "人間（複数形）" },
-      { en: "Wait a minute.", ja: "ちょっと待って。" },
-      { en: "What’s wrong?", ja: "どうかしたの？" },
-      { en: "Hurry up.", ja: "急いで。" },
-      { en: "Be careful.", ja: "気をつけて。" },
-      { en: "This way.", ja: "こちらです。" },
-      { en: "travel back in time", ja: "時間をさかのぼって旅をする" },
-      { en: "a breathtaking", ja: "息をのむような" },
-      { en: "catch up with", ja: "～に追いつく" },
-      { en: "What’s up with", ja: "～はどうしたんだろう" },
-      { en: "big deal", ja: "たいしたこと" },
-      { en: "cut off", ja: "～を切り離す、遮断する" },
-      { en: "so that", ja: "～するために" }
-    ];
+`write\t書く
+open\t開ける
+close\t閉める
+stand\t立つ
+sit\t座る
+run\t走る
+walk\t歩く
+come\t来る
+go\t行く
+eat\t食べる
+drink\t飲む
+like\t好き
+love\t愛する
+have\t持っている
+play\t遊ぶ、（スポーツを）する
+study\t勉強する
+do\t～する
+make\t作る
+use\t使う
+want\t～が欲しい
+know\t知っている
+think\t考える
+need\t必要とする
+live\t住む、生きる
+name\t名前
+friend\t友達
+school\t学校
+class\tクラス
+classroom\t教室
+teacher\t先生
+student\t生徒
+desk\t机
+chair\tいす
+bag\tかばん
+book\t本
+notebook\tノート
+pen\tペン
+pencil\t鉛筆
+eraser\t消しゴム
+blackboard\t黒板
+ruler\t定規
+map\t地図
+door\tドア
+window\t窓
+clock\t時計
+picture\t絵
+music\t音楽
+English\t英語
+math\t数学
+science\t理科`,
 
-    let current = {};
-    let isJapaneseToEnglish = true;
-    let remainingVocab = [...vocab];
-    let totalQuestions = 0;
-    let correctAnswers = 0;
+`history\t歴史
+geography\t地理
+art\t芸術
+physical education\t体育
+day\t日
+week\t週
+month\t月
+year\t年
+Monday\t月曜日
+Tuesday\t火曜日
+Wednesday\t水曜日
+Thursday\t木曜日
+Friday\t金曜日
+Saturday\t土曜日
+Sunday\t日曜日
+time\t時間
+hour\t時間（単位）
+minute\t分
+second\t秒
+today\t今日
+tomorrow\t明日
+yesterday\t昨日
+now\t今
+before\t前に
+after\t後で
+morning\t朝
+afternoon\t午後
+evening\t夕方
+night\t夜
+early\t早く
+late\t遅く
+always\tいつも
+usually\t普段は
+sometimes\t時々
+never\t決して～ない
+often\tしばしば
+already\tすでに
+yet\tまだ（否定文で）
+just\tちょうど
+together\t一緒に
+alone\t一人で
+everyone\tみんな
+everything\tすべて
+everywhere\tどこでも
+some\t誰か、いくつかの
+someone\t誰か
+something\t何か
+somewhere\tどこか
+any\tどれでも、いくつでも
+anyone\t誰でも`,
 
-    function getRandomQuestion() {
-      if (remainingVocab.length === 0) {
-        document.getElementById("question").textContent = "全ての問題が終了しました！";
-        document.getElementById("showAnswerBtn").style.display = "none";
-        document.getElementById("correctBtn").style.display = "none";
-        document.getElementById("wrongBtn").style.display = "none";
-        return;
-      }
+`anything\t何でも
+anywhere\tどこでも
+no\tいいえ、ない
+nobody\t誰も～ない
+nothing\t何も～ない
+nowhere\tどこにも～ない
+home\t家
+house\t家
+family\t家族
+mother\t母
+father\t父
+parent\t親
+brother\t兄弟
+sister\t姉妹
+grandfather\t祖父
+grandmother\t祖母
+uncle\tおじ
+aunt\tおば
+son\t息子
+daughter\t娘
+baby\t赤ちゃん
+friend\t友達
+neighbor\t近所の人
+classmate\tクラスメイト
+teacher\t先生
+student\t生徒
+class\tクラス
+lesson\t授業
+subject\t科目
+question\t質問
+answer\t答え
+problem\t問題
+exercise\t練習
+homework\t宿題
+exam\t試験
+grade\t成績
+pass\t合格する
+fail\t失敗する
+study\t勉強する
+learn\t学ぶ
+teach\t教える
+read\t読む
+write\t書く
+listen\t聞く
+speak\t話す
+talk\t話す
+say\t言う
+tell\t伝える
+ask\t尋ねる
+answer\t答える`,
 
-      const index = Math.floor(Math.random() * remainingVocab.length);
-      current = remainingVocab[index];
-      remainingVocab.splice(index, 1);
+];
 
-      isJapaneseToEnglish = Math.random() < 0.5;
-      document.getElementById("question").textContent = isJapaneseToEnglish ? current.ja : current.en;
-      document.getElementById("answer").style.display = "none";
-      document.getElementById("correctBtn").style.display = "none";
-      document.getElementById("wrongBtn").style.display = "none";
-      document.getElementById("showAnswerBtn").style.display = "inline-block";
+// --- 設定 ---
+const TOTAL_DAYS = 7;  // 6日分+7日目まとめ復習（仮に7日目は300語復習）
+const WORDS_PER_DAY = 50;
+
+// --- グローバル ---
+let currentDay = null;
+let currentWords = [];
+let pendingIndices = [];
+let currentIndex = null;
+let showingAnswer = false;
+
+// --- DOM ---
+const dayButtonsDiv = document.getElementById('day-buttons');
+const cardDiv = document.getElementById('card');
+const englishDiv = document.getElementById('english');
+const japaneseDiv = document.getElementById('japanese');
+const showAnswerBtn = document.getElementById('show-answer-btn');
+const okBtn = document.getElementById('ok-btn');
+const missBtn = document.getElementById('miss-btn');
+const progressDiv = document.getElementById('progress');
+
+// --- ローカルストレージキー ---
+const STORAGE_KEY = 'vocabStudyProgress';
+
+// --- 初期化 ---
+function init() {
+  // ボタン作成
+  for(let i=1; i<=TOTAL_DAYS; i++) {
+    const btn = document.createElement('button');
+    btn.textContent = `Day ${i}`;
+    btn.id = 'day-btn-' + i;
+    btn.disabled = !canAccessDay(i);
+    btn.onclick = () => startDay(i);
+    dayButtonsDiv.appendChild(btn);
+  }
+  updateDayButtons();
+
+  // カード非表示
+  cardDiv.style.display = 'none';
+}
+
+// --- その日の学習可能か判定 ---
+function canAccessDay(day) {
+  if(day === 1) return true;
+  const progress = loadProgress();
+  // 1つ前の日がコンプリート済みならアクセスOK
+  return progress[day-1] && progress[day-1].complete;
+}
+
+// --- 進捗取得（localStorageから） ---
+function loadProgress() {
+  const json = localStorage.getItem(STORAGE_KEY);
+  if(!json) return {};
+  try {
+    return JSON.parse(json);
+  } catch {
+    return {};
+  }
+}
+
+// --- 進捗保存 ---
+function saveProgress(progress) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(progress));
+}
+
+// --- 進捗更新 ---
+function updateDayButtons() {
+  const progress = loadProgress();
+  for(let i=1; i<=TOTAL_DAYS; i++) {
+    const btn = document.getElementById('day-btn-' + i);
+    if(!btn) continue;
+    btn.disabled = !canAccessDay(i);
+    if(progress[i] && progress[i].complete) {
+      btn.textContent = `Day ${i} - コンプリート ✅`;
+    } else {
+      btn.textContent = `Day ${i}`;
     }
+  }
+}
 
-    document.getElementById("showAnswerBtn").addEventListener("click", () => {
-      document.getElementById("answer").textContent = isJapaneseToEnglish ? current.en : current.ja;
-      document.getElementById("answer").style.display = "block";
-      document.getElementById("correctBtn").style.display = "inline-block";
-      document.getElementById("wrongBtn").style.display = "inline-block";
-      document.getElementById("showAnswerBtn").style.display = "none";
-    });
-
-    document.getElementById("correctBtn").addEventListener("click", () => {
-      correctAnswers++;
-      totalQuestions++;
-      checkScore();
-      getRandomQuestion();
-    });
-
-    document.getElementById("wrongBtn").addEventListener("click", () => {
-      totalQuestions++;
-      checkScore();
-      getRandomQuestion();
-    });
-
-    function checkScore() {
-      if (totalQuestions % 10 === 0) {
-        const percent = Math.round((correctAnswers / totalQuestions) * 100);
-        document.getElementById("score").textContent = `${totalQuestions}問中 ${correctAnswers}問正解 (${percent}%)`;
-      }
+// --- 学習開始 ---
+function startDay(day) {
+  currentDay = day;
+  // 7日目はまとめ復習（例として全日分の単語をまとめて出す）
+  if(day === 7) {
+    currentWords = [];
+    for(let d=0; d<6; d++) {
+      currentWords = currentWords.concat(parseVocabText(vocabTextByDay[d]));
     }
+  } else {
+    currentWords = parseVocabText(vocabTextByDay[day-1]);
+  }
+  resetDayProgress(day);
+  nextQuestion();
+  cardDiv.style.display = 'block';
+  updateDayButtons();
+}
 
-    getRandomQuestion();
-  </script>
+// --- テキストを単語配列に変換 ---
+function parseVocabText(text) {
+  return text.trim().split('\n').map(line => {
+    const [eng, jap] = line.split('\t');
+    return {english: eng, japanese: jap};
+  });
+}
+
+// --- その日の学習進捗リセット（初回のみ） ---
+function resetDayProgress(day) {
+  const progress = loadProgress();
+  if(!progress[day]) {
+    progress[day] = {pending: [...Array(currentWords.length).keys()], complete: false};
+    saveProgress(progress);
+  }
+  // pendingをセット
+  pendingIndices = [...progress[day].pending];
+  updateProgressDisplay();
+}
+
+// --- 次の問題表示 ---
+function nextQuestion() {
+  if(pendingIndices.length === 0) {
+    // コンプリート
+    markDayComplete(currentDay);
+    alert(`Day ${currentDay} コンプリート！`);
+    cardDiv.style.display = 'none';
+    updateDayButtons();
+    return;
+  }
+  // ランダムに出す
+  const randomIdx = Math.floor(Math.random() * pendingIndices.length);
+  currentIndex = pendingIndices[randomIdx];
+  showingAnswer = false;
+  englishDiv.textContent = currentWords[currentIndex].english;
+  japaneseDiv.style.display = 'none';
+  japaneseDiv.textContent = currentWords[currentIndex].japanese;
+  showAnswerBtn.style.display = 'inline-block';
+  okBtn.style.display = 'none';
+  missBtn.style.display = 'none';
+  updateProgressDisplay();
+}
+
+// --- 答え表示 ---
+showAnswerBtn.onclick = () => {
+  japaneseDiv.style.display = 'block';
+  showingAnswer = true;
+  showAnswerBtn.style.display = 'none';
+  okBtn.style.display = 'inline-block';
+  missBtn.style.display = 'inline-block';
+}
+
+// --- OK（正解）ボタン ---
+okBtn.onclick = () => {
+  // pendingから除外
+  pendingIndices = pendingIndices.filter(idx => idx !== currentIndex);
+  saveDayProgress();
+  nextQuestion();
+}
+
+// --- ミスボタン ---
+missBtn.onclick = () => {
+  // そのままpendingに残し次回出題
+  nextQuestion();
+}
+
+// --- 進捗保存 ---
+function saveDayProgress() {
+  const progress = loadProgress();
+  progress[currentDay].pending = pendingIndices;
+  progress[currentDay].complete = (pendingIndices.length === 0);
+  saveProgress(progress);
+}
+
+// --- 日の完了記録 ---
+function markDayComplete(day) {
+  const progress = loadProgress();
+  if(!progress[day]) progress[day] = {};
+  progress[day].complete = true;
+  progress[day].pending = [];
+  saveProgress(progress);
+}
+
+// --- 進捗表示更新 ---
+function updateProgressDisplay() {
+  progressDiv.textContent = `残り単語数: ${pendingIndices.length}`;
+}
+
+// --- 起動 ---
+init();
+
+</script>
+
 </body>
 </html>
